@@ -22,10 +22,10 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Checkout main
+      - name: Checkout master
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: master
           fetch-depth: 0
 
       - name: Setup Node.js

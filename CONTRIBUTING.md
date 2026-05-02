@@ -34,10 +34,10 @@ Useful commands:
 
 This repository follows a lightweight Git Flow setup:
 
-- `main`: stable baseline and release history
+- `master`: stable baseline and release history
 - `develop`: integration branch for upcoming work
 - `feature/<name>`: feature branches created from `develop`
-- `hotfix/<name>`: urgent fixes created from `main`
+- `hotfix/<name>`: urgent fixes created from `master`
 - `release/<name>`: optional release-preparation branches created from `develop`
 
 Preferred flow:
@@ -45,7 +45,7 @@ Preferred flow:
 1. branch from `develop`
 2. run `npm run check` before opening a PR
 3. merge features back into `develop`
-4. merge `develop` into `main` for stable releases
+4. merge `develop` into `master` for stable releases
 
 ## Local quality gates
 
@@ -84,10 +84,10 @@ Examples:
 ## Release workflow
 
 1. merge completed feature work into `develop`
-2. run the **Prepare Release** workflow to create a `release/vX.Y.Z` branch and PR into `main`
-3. review and merge that release PR into `main`
-4. run the **Publish Release** workflow from `main` to create the tag, GitHub Release, and packaged artifact
-5. merge `main` back into `develop` to keep Git Flow aligned
+2. run the **Prepare Release** workflow to create a `release/vX.Y.Z` branch and PR into `master`
+3. review and merge that release PR into `master`
+4. run the **Publish Release** workflow from `master` to create the tag, GitHub Release, and packaged artifact
+5. merge `master` back into `develop` to keep Git Flow aligned
 
 ## Architecture rules
 
