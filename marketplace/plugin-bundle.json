@@ -20,7 +20,9 @@
       "copilot/skills/company-governance-review/skill.json",
       "copilot/skills/company-governance-review/SKILL.md",
       "copilot/skills/company-metrics-review/skill.json",
-      "copilot/skills/company-metrics-review/SKILL.md"
+      "copilot/skills/company-metrics-review/SKILL.md",
+      "copilot/skills/delivery-ritual/skill.json",
+      "copilot/skills/delivery-ritual/SKILL.md"
     ]
   },
   "documentation": [

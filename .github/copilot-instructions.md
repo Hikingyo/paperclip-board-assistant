@@ -61,6 +61,7 @@ The current tool surface is intentionally read-only and maps to endpoints alread
 - When adding major new tool families, keep `docs/board-assistant-roadmap.md` and `docs/architecture.md` in sync with what has shipped and what remains planned.
 - Keep publishable Copilot artifacts in `copilot/` and reflect staged bundle changes in `marketplace/plugin-bundle.json`.
 - When a single action or a bundle of actions becomes recurrent, consider extracting it into a skill or codifying it in these instructions instead of repeating it ad hoc.
+- The repository delivery ritual is now an explicit skill candidate promoted to `copilot/skills/delivery-ritual/`; use it for recurring check, commit, push, and PR workflows.
 - The repository uses a lightweight Git Flow model: `main` is the stable branch, `develop` is the integration branch, and feature branches should start from `develop`.
 - Husky hooks are part of the contributor workflow: pre-commit checks formatting and linting, commit-msg enforces Conventional Commits, and pre-push runs the test suite.
 - Release notes are generated with `git-cliff`, configured in `cliff.toml`, so semantic commit history is now part of the repository contract.
