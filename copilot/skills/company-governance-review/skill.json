@@ -1,0 +1,11 @@
+{
+  "name": "company-governance-review",
+  "version": "0.1.0",
+  "description": "Review a Paperclip company governance posture using company, board summary, and policy tools.",
+  "prompt": "SKILL.md",
+  "uses_tools": [
+    "paperclip_get_company",
+    "paperclip_get_company_board_summary",
+    "paperclip_get_company_policies"
+  ]
+}

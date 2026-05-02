@@ -1,0 +1,11 @@
+{
+  "name": "company-metrics-review",
+  "version": "0.1.0",
+  "description": "Review a Paperclip company's operating metrics using derived budget and issue-capacity signals.",
+  "prompt": "SKILL.md",
+  "uses_tools": [
+    "paperclip_get_company",
+    "paperclip_get_company_board_summary",
+    "paperclip_get_company_metrics"
+  ]
+}

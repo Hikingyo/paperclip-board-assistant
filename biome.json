@@ -1,7 +1,15 @@
 {
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!dist", "!coverage", "!node_modules"]
+    "includes": [
+      "**",
+      "!dist",
+      "!coverage",
+      "!node_modules",
+      "!**/dist",
+      "!**/coverage",
+      "!**/node_modules"
+    ]
   },
   "formatter": {
     "enabled": true,

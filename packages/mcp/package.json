@@ -1,0 +1,28 @@
+{
+  "name": "@hikingyo/paperclip-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "MCP runtime for the Paperclip board assistant Copilot plugin",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "paperclip-mcp-server": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rimraf dist coverage",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --coverage",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "inspector": "npx @modelcontextprotocol/inspector node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.2"
+  }
+}

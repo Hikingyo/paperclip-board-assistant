@@ -3,6 +3,8 @@ import type {
   PaperclipAdapter,
   PaperclipCompany,
   PaperclipCompanyBoardSummary,
+  PaperclipCompanyMetrics,
+  PaperclipCompanyPolicies,
   PaperclipHealth,
   PaperclipPlugin,
   PaperclipProfile,
@@ -18,6 +20,17 @@ function formatCurrencyFromCents(value: number | null): string {
     style: "currency",
     currency: "USD",
   }).format(value / 100);
+}
+
+function formatBudgetStatus(value: PaperclipCompanyMetrics["budget_status"]): string {
+  switch (value) {
+    case "not_configured":
+      return "Not configured";
+    case "over_budget":
+      return "Over budget";
+    default:
+      return "Within budget";
+  }
 }
 
 function renderCompanyFacts(company: PaperclipCompany): string[] {
@@ -133,6 +146,51 @@ export function renderCompanyBoardSummary(summary: PaperclipCompanyBoardSummary)
     ...(boardFlags.length
       ? boardFlags.map((flag) => `- ${flag}`)
       : ["- No immediate board flags derived from company metadata."]),
+  ].join("\n");
+}
+
+export function renderCompanyMetrics(metrics: PaperclipCompanyMetrics): string {
+  const { company } = metrics;
+
+  return [
+    `# Company metrics: ${company.name}`,
+    "",
+    `- **Company ID**: ${company.id}`,
+    `- **Monthly budget**: ${formatCurrencyFromCents(company.budgetMonthlyCents)}`,
+    `- **Monthly spend**: ${formatCurrencyFromCents(company.spentMonthlyCents)}`,
+    `- **Budget remaining**: ${formatCurrencyFromCents(metrics.budget_remaining_cents)}`,
+    `- **Budget utilization**: ${metrics.budget_utilization_percent ?? "Not set"}${
+      metrics.budget_utilization_percent === null ? "" : "%"
+    }`,
+    `- **Budget status**: ${formatBudgetStatus(metrics.budget_status)}`,
+    `- **Current issue counter**: ${company.issueCounter}`,
+    `- **Next issue number**: ${metrics.next_issue_number}`,
+    `- **Attachment max bytes**: ${metrics.attachment_max_bytes}`,
+    `- **Attachment max MiB**: ${metrics.attachment_max_mebibytes}`,
+    `- **Last updated**: ${company.updatedAt}`,
+  ].join("\n");
+}
+
+export function renderCompanyPolicies(policies: PaperclipCompanyPolicies): string {
+  const { company, governance_flags: governanceFlags } = policies;
+
+  return [
+    `# Company policies: ${company.name}`,
+    "",
+    `- **Company ID**: ${company.id}`,
+    `- **Board approval required for new agents**: ${policies.require_board_approval_for_new_agents}`,
+    `- **Feedback data sharing enabled**: ${policies.feedback_data_sharing_enabled}`,
+    `- **Feedback consent recorded at**: ${policies.feedback_data_sharing_consent_at ?? "None"}`,
+    `- **Feedback consent recorded by user**: ${policies.feedback_data_sharing_consent_by_user_id ?? "None"}`,
+    `- **Feedback terms version**: ${policies.feedback_data_sharing_terms_version ?? "None"}`,
+    `- **Brand color**: ${policies.brand_color ?? "None"}`,
+    `- **Logo asset ID**: ${policies.logo_asset_id ?? "None"}`,
+    `- **Logo URL**: ${policies.logo_url ?? "None"}`,
+    "",
+    "## Governance flags",
+    ...(governanceFlags.length
+      ? governanceFlags.map((flag) => `- ${flag}`)
+      : ["- No immediate governance flags derived from company metadata."]),
   ].join("\n");
 }
 

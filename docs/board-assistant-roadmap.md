@@ -1,6 +1,6 @@
 # Board Assistant Roadmap
 
-This project is evolving from a small read-only Paperclip MCP server into a **board assistant** and **company design companion** for Paperclip companies. The target outcome is an MCP server plus a broader Copilot experience that can help operators:
+This project is evolving from a small read-only Paperclip MCP server into a **board assistant** and **company design companion** for Paperclip companies. The target outcome is a plugin workspace composed of an MCP server plus a broader Copilot experience that can help operators:
 
 - understand execution health
 - supervise agents, projects, tasks, approvals, and routines
@@ -45,11 +45,13 @@ The server already exposes these read-only tools:
 - `paperclip_get_profile`
 - `paperclip_get_company`
 - `paperclip_get_company_board_summary`
+- `paperclip_get_company_metrics`
+- `paperclip_get_company_policies`
 - `paperclip_list_companies`
 - `paperclip_list_adapters`
 - `paperclip_list_plugins`
 
-These form the instance-level inspection layer plus the first company-level board visibility summary, but not yet the broader board assistant layer.
+These form the instance-level inspection layer plus the first company-level board visibility views for summary, metrics, and governance, but not yet the broader board assistant layer.
 
 ## Internal Paperclip agents vs Copilot-side assistants
 

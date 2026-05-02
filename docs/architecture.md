@@ -1,5 +1,26 @@
 # Architecture
 
+## Repository layout
+
+This repository is now structured as a publishable Copilot plugin workspace with three explicit bricks:
+
+1. **MCP**
+   - `packages/mcp`
+   - the executable MCP runtime that talks to Paperclip over stdio
+
+2. **Agent**
+   - `copilot/agent`
+   - Copilot-side assistant metadata and instructions
+
+3. **Skills**
+   - `copilot/skills`
+   - prompt-backed skills that orchestrate the MCP surface
+
+The publishable bundle inventory lives in:
+
+- `marketplace/plugin-bundle.json`
+- `scripts/package-plugin.mjs`
+
 ## Current runtime architecture
 
 This project is a **TypeScript MCP server** that speaks **stdio** and delegates all business data access to a local PaperclipAI HTTP API.
@@ -7,39 +28,41 @@ This project is a **TypeScript MCP server** that speaks **stdio** and delegates 
 ### Layers
 
 1. **Runtime bootstrap**
-   - `src/index.ts`
+   - `packages/mcp/src/index.ts`
    - loads runtime config
    - creates the MCP server
    - connects stdio transport
 
 2. **Server assembly**
-   - `src/server.ts`
+   - `packages/mcp/src/server.ts`
    - constructs `McpServer`
    - wires the Paperclip client into tool registrars
 
 3. **Configuration**
-   - `src/config.ts`
+   - `packages/mcp/src/config.ts`
    - validates environment variables
    - normalizes the target Paperclip base URL
 
 4. **API boundary**
-   - `src/services/paperclip-client.ts`
+   - `packages/mcp/src/services/paperclip-client.ts`
    - the only module that performs direct HTTP requests to Paperclip
 
 5. **Tool surface**
-   - `src/tools/paperclip-tools.ts`
+   - `packages/mcp/src/tools/paperclip-tools.ts`
    - registers MCP tools
    - depends on shared schemas, helpers, and renderers
 
 6. **Shared tool utilities**
-   - `src/tools/paperclip-tool-helpers.ts`
+   - `packages/mcp/src/tools/paperclip-tool-helpers.ts`
    - result helpers, pagination, response selection, and error shaping
-   - `src/tools/paperclip-renderers.ts`
+   - `packages/mcp/src/tools/paperclip-renderers.ts`
    - markdown renderers for Paperclip resources
+   - `packages/mcp/src/tools/paperclip-company-insights.ts`
+   - shared derived company visibility views such as board summary, metrics, and policies
 
 7. **Contracts**
-   - `src/types.ts`
-   - `src/schemas.ts`
+   - `packages/mcp/src/types.ts`
+   - `packages/mcp/src/schemas.ts`
 
 ## Why this structure
 
@@ -48,6 +71,7 @@ The architecture is intentionally split so the project can grow in three directi
 - more Paperclip resource families
 - more board assistant workflow tools
 - future setup/restructuring wizard features
+- publishable Copilot agent and skills assets alongside the MCP runtime
 
 ## Product expansion model
 
@@ -66,6 +90,14 @@ The long-term product is layered:
    - skills
    - assistant personas
    - setup/restructuring orchestration
+
+## Packaging convention
+
+The repository keeps source artifacts separate from the staged publishable bundle:
+
+1. source artifacts live in `packages/mcp`, `copilot/agent`, and `copilot/skills`
+2. `marketplace/plugin-bundle.json` declares the publishable inventory
+3. `npm run package:plugin` stages a release-ready bundle under `dist/marketplace/`
 
 ## Direction on agents
 

@@ -2,8 +2,11 @@
 .idea/
 .serena/
 coverage/
+**/coverage/
 node_modules/
+**/node_modules/
 dist/
+**/dist/
 .env
 .env.local
 .env.*.local

@@ -63,6 +63,31 @@ export interface PaperclipCompanyBoardSummary extends Record<string, unknown> {
   board_flags: string[];
 }
 
+export type PaperclipCompanyBudgetStatus = "not_configured" | "within_budget" | "over_budget";
+
+export interface PaperclipCompanyMetrics extends Record<string, unknown> {
+  company: PaperclipCompany;
+  budget_status: PaperclipCompanyBudgetStatus;
+  budget_remaining_cents: number | null;
+  budget_utilization_percent: number | null;
+  next_issue_number: number;
+  attachment_max_bytes: number;
+  attachment_max_mebibytes: number;
+}
+
+export interface PaperclipCompanyPolicies extends Record<string, unknown> {
+  company: PaperclipCompany;
+  require_board_approval_for_new_agents: boolean;
+  feedback_data_sharing_enabled: boolean;
+  feedback_data_sharing_consent_at: string | null;
+  feedback_data_sharing_consent_by_user_id: string | null;
+  feedback_data_sharing_terms_version: string | null;
+  brand_color: string | null;
+  logo_asset_id: string | null;
+  logo_url: string | null;
+  governance_flags: string[];
+}
+
 export interface PaperclipAdapter extends Record<string, unknown> {
   type: string;
   label: string;
