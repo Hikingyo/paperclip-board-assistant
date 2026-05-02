@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Only the latest state of `main` is considered actively supported for security fixes.
+Only the latest state of `master` is considered actively supported for security fixes.
 
 ## Reporting a vulnerability
 

@@ -62,7 +62,7 @@ The current tool surface is intentionally read-only and maps to endpoints alread
 - Keep publishable Copilot artifacts in `copilot/` and reflect staged bundle changes in `marketplace/plugin-bundle.json`.
 - When a single action or a bundle of actions becomes recurrent, consider extracting it into a skill or codifying it in these instructions instead of repeating it ad hoc.
 - For repo-only recurring workflows, prefer `.github/prompts/*.prompt.md`; the delivery ritual now lives in `.github/prompts/delivery-ritual.prompt.md`.
-- The repository uses a lightweight Git Flow model: `main` is the stable branch, `develop` is the integration branch, and feature branches should start from `develop`.
+- The repository uses a lightweight Git Flow model: `master` is the stable branch, `develop` is the integration branch, and feature branches should start from `develop`.
 - Husky hooks are part of the contributor workflow: pre-commit checks formatting and linting, commit-msg enforces Conventional Commits, and pre-push runs the test suite.
 - Release notes are generated with `git-cliff`, configured in `cliff.toml`, so semantic commit history is now part of the repository contract.
-- GitHub release automation is split into two workflows: `release-prepare.yml` prepares a release branch from `develop`, and `release-publish.yml` publishes a tagged GitHub Release from `main`.
+- GitHub release automation is split into two workflows: `release-prepare.yml` prepares a release branch from `develop`, and `release-publish.yml` publishes a tagged GitHub Release from `master`.

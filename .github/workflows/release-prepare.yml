@@ -104,7 +104,7 @@ jobs:
           EOF
 
           gh pr create \
-            --base main \
+            --base master \
             --head "$BRANCH" \
             --title "chore(release): prepare v$VERSION" \
             --body-file release-pr-body.md

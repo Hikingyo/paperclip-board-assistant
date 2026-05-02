@@ -138,13 +138,13 @@ npm run inspector
 
 ## Repository standards
 
-- GitHub Actions CI runs `npm run ci` on `main`, `develop`, and pull requests
+- GitHub Actions CI runs `npm run ci` on `master`, `develop`, and pull requests
 - commit messages follow Conventional Commits and are linted locally and in CI
 - changelog generation uses `git-cliff` and `cliff.toml`
 - Dependabot is enabled for npm and GitHub Actions
 - issue templates and a pull request template are included
 - contribution workflow is documented in `CONTRIBUTING.md`
-- the repository uses a lightweight Git Flow model with `main` and `develop`
+- the repository uses a lightweight Git Flow model with `master` and `develop`
 
 ## Governance
 
@@ -159,8 +159,8 @@ npm run inspector
 - Generate or refresh `CHANGELOG.md` with `npm run changelog`
 - Preview only unreleased entries with `npm run changelog:unreleased`
 - Preview the current tagged release notes with `npm run release:notes:current`
-- Run the **Prepare Release** GitHub workflow from `develop` to create a `release/vX.Y.Z` branch and PR into `main`
-- After merging the release PR into `main`, run the **Publish Release** GitHub workflow to create the tag, GitHub Release notes, and release artifact
+- Run the **Prepare Release** GitHub workflow from `develop` to create a `release/vX.Y.Z` branch and PR into `master`
+- After merging the release PR into `master`, run the **Publish Release** GitHub workflow to create the tag, GitHub Release notes, and release artifact
 
 ## Roadmap
 
