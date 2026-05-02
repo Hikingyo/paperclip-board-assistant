@@ -7,13 +7,7 @@
   "mcp_component": "../../packages/mcp/package.json",
   "skills": [
     "../skills/company-governance-review/skill.json",
-    "../skills/company-metrics-review/skill.json",
-    "../skills/delivery-ritual/skill.json"
+    "../skills/company-metrics-review/skill.json"
   ],
-  "capabilities": [
-    "company_visibility",
-    "governance_review",
-    "board_metrics_review",
-    "repository_delivery"
-  ]
+  "capabilities": ["company_visibility", "governance_review", "board_metrics_review"]
 }
