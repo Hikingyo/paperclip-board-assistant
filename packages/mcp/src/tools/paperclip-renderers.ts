@@ -265,3 +265,43 @@ export function renderPlugins(page: PaginatedResult<PaperclipPlugin>): string {
     ...(blocks.length ? blocks : ["No plugins found."]),
   ].join("\n");
 }
+
+export function renderCompanyExecutionSummary(summary: PaperclipCompanyExecutionSummary): string {
+  const companyBlocks = summary.companies.map((company) =>
+    [
+      `## ${company.company_name} (${company.company_id})`,
+      `- **Status**: ${company.status}`,
+      `- **Board attention needed**: ${company.board_attention_needed}`,
+      `- **Budget status**: ${formatBudgetStatus(company.budget_status)}`,
+      `- **Budget utilization**: ${formatBudgetUtilization(company.budget_utilization_percent)}`,
+      `- **Budget remaining**: ${formatCurrencyFromCents(company.budget_remaining_cents)}`,
+      `- **Last updated**: ${company.last_updated_at}`,
+      ...(company.board_flags.length
+        ? ["- **Board flags**:", ...company.board_flags.map((flag) => `  - ${flag}`)]
+        : ["- **Board flags**: None"]),
+    ].join("\n"),
+  );
+
+  return [
+    "# Company execution summary",
+    "",
+    `- **Derived from**: ${summary.derived_from}`,
+    `- **Visible companies**: ${summary.total_companies}`,
+    `- **Active companies**: ${summary.active_companies}`,
+    `- **Companies requiring board attention**: ${summary.companies_requiring_board_attention}`,
+    `- **Over-budget companies**: ${summary.over_budget_companies}`,
+    `- **Board approval gated companies**: ${summary.board_approval_gated_companies}`,
+    `- **Feedback sharing disabled companies**: ${summary.feedback_sharing_disabled_companies}`,
+    `- **Total monthly budget**: ${formatCurrencyFromCents(summary.total_monthly_budget_cents)}`,
+    `- **Total monthly spend**: ${formatCurrencyFromCents(summary.total_monthly_spend_cents)}`,
+    `- **Total budget remaining**: ${formatCurrencyFromCents(summary.total_budget_remaining_cents)}`,
+    "",
+    "## Portfolio flags",
+    ...(summary.portfolio_flags.length
+      ? summary.portfolio_flags.map((flag) => `- ${flag}`)
+      : ["- No immediate portfolio flags derived from visible company metadata."]),
+    "",
+    "## Company focus",
+    ...(companyBlocks.length ? companyBlocks : ["No companies are visible."]),
+  ].join("\n");
+}

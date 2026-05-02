@@ -95,6 +95,7 @@ Copy `packages/mcp/.env.example` to `.env` when you want to override the default
 - `paperclip_get_health`
 - `paperclip_get_session`
 - `paperclip_get_profile`
+- `paperclip_company_execution_summary`
 - `paperclip_get_company`
 - `paperclip_get_company_activity_feed`
 - `paperclip_get_company_board_summary`
@@ -104,7 +105,7 @@ Copy `packages/mcp/.env.example` to `.env` when you want to override the default
 - `paperclip_list_adapters`
 - `paperclip_list_plugins`
 
-`list_*` tools accept `limit`, `offset`, and `response_format`. `paperclip_get_company`, `paperclip_get_company_activity_feed`, `paperclip_get_company_board_summary`, `paperclip_get_company_metrics`, and `paperclip_get_company_policies` also accept an optional `company_id`, and otherwise auto-select the sole visible company.
+`list_*` tools accept `limit`, `offset`, and `response_format`. `paperclip_get_company`, `paperclip_get_company_activity_feed`, `paperclip_get_company_board_summary`, `paperclip_get_company_metrics`, and `paperclip_get_company_policies` also accept an optional `company_id`, and otherwise auto-select the sole visible company. `paperclip_company_execution_summary` is portfolio-wide and summarizes all visible companies.
 
 ## Marketplace packaging
 

@@ -447,3 +447,45 @@ describe("paperclip renderers", () => {
     ).toContain("Company metadata updated");
   });
 });
+
+  it("renders a company execution summary with company focus", () => {
+    expect(
+      renderCompanyExecutionSummary({
+        derived_from: "visible_companies_metadata",
+        total_companies: 2,
+        active_companies: 2,
+        companies_requiring_board_attention: 1,
+        over_budget_companies: 1,
+        board_approval_gated_companies: 1,
+        feedback_sharing_disabled_companies: 1,
+        total_monthly_budget_cents: 300_000,
+        total_monthly_spend_cents: 175_000,
+        total_budget_remaining_cents: 125_000,
+        portfolio_flags: ["1 visible company requires board attention."],
+        companies: [
+          {
+            company_id: "company-1",
+            company_name: "Acme",
+            status: "active",
+            budget_status: "over_budget",
+            budget_utilization_percent: 125,
+            budget_remaining_cents: -25_000,
+            board_attention_needed: true,
+            board_flags: ["Monthly spend is above the configured budget."],
+            last_updated_at: "2026-01-03T00:00:00.000Z",
+          },
+          {
+            company_id: "company-2",
+            company_name: "Globex",
+            status: "active",
+            budget_status: "within_budget",
+            budget_utilization_percent: 25,
+            budget_remaining_cents: 150_000,
+            board_attention_needed: false,
+            board_flags: [],
+            last_updated_at: "2026-01-02T00:00:00.000Z",
+          },
+        ],
+      }),
+    ).toContain("## Acme (company-1)");
+  });

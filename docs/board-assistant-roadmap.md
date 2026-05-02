@@ -43,6 +43,7 @@ The server already exposes these read-only tools:
 - `paperclip_get_health`
 - `paperclip_get_session`
 - `paperclip_get_profile`
+- `paperclip_company_execution_summary`
 - `paperclip_get_company`
 - `paperclip_get_company_activity_feed`
 - `paperclip_get_company_board_summary`
@@ -52,7 +53,7 @@ The server already exposes these read-only tools:
 - `paperclip_list_adapters`
 - `paperclip_list_plugins`
 
-These form the instance-level inspection layer plus the first company-level board visibility views for summary, metrics, and governance, but not yet the broader board assistant layer.
+These form the instance-level inspection layer, the first company-level board visibility views for summary, metrics, and governance, and the first derived workflow synthesis view across visible companies.
 
 ## Internal Paperclip agents vs Copilot-side assistants
 
