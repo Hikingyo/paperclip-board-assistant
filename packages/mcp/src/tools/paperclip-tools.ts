@@ -3,6 +3,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { companyReadOnlyGetSchema, readOnlyGetSchema, readOnlyListSchema } from "../schemas.js";
 import type { PaperclipClient } from "../services/paperclip-client.js";
 import {
+  buildCompanyActivityFeed,
   buildCompanyBoardSummary,
   buildCompanyMetrics,
   buildCompanyPolicies,
@@ -11,6 +12,7 @@ import {
   renderAdapters,
   renderCompanies,
   renderCompany,
+  renderCompanyActivityFeed,
   renderCompanyBoardSummary,
   renderCompanyMetrics,
   renderCompanyPolicies,
@@ -129,6 +131,34 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
       try {
         const company = await resolveCompany(client, companyId);
         return createTextResult(selectText(response_format, company, renderCompany), company);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_company_activity_feed",
+    {
+      title: "Get Paperclip company activity feed",
+      description:
+        "Read a derived activity feed for a visible company using timestamps and board signals already exposed by Paperclip company metadata.",
+      inputSchema: companyReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id: companyId, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, companyId);
+        const activityFeed = buildCompanyActivityFeed(company);
+        return createTextResult(
+          selectText(response_format, activityFeed, renderCompanyActivityFeed),
+          activityFeed,
+        );
       } catch (error) {
         return createErrorResult(error);
       }

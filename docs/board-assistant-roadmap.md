@@ -44,6 +44,7 @@ The server already exposes these read-only tools:
 - `paperclip_get_session`
 - `paperclip_get_profile`
 - `paperclip_get_company`
+- `paperclip_get_company_activity_feed`
 - `paperclip_get_company_board_summary`
 - `paperclip_get_company_metrics`
 - `paperclip_get_company_policies`

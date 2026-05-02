@@ -88,6 +88,24 @@ export interface PaperclipCompanyPolicies extends Record<string, unknown> {
   governance_flags: string[];
 }
 
+export type PaperclipCompanyActivityEventKind = "lifecycle" | "governance" | "board_flag";
+
+export interface PaperclipCompanyActivityEvent extends Record<string, unknown> {
+  id: string;
+  kind: PaperclipCompanyActivityEventKind;
+  occurred_at: string;
+  title: string;
+  summary: string;
+}
+
+export interface PaperclipCompanyActivityFeed extends Record<string, unknown> {
+  company: PaperclipCompany;
+  derived_from: "visible_company_metadata";
+  total_events: number;
+  latest_event_at: string | null;
+  activity: PaperclipCompanyActivityEvent[];
+}
+
 export interface PaperclipAdapter extends Record<string, unknown> {
   type: string;
   label: string;
