@@ -8,10 +8,16 @@
 - Build the server: `npm run build`
 - Run type checks: `npm run typecheck`
 - Run the linter: `npm run lint`
+- Run the last-commit conventional commit check: `npm run lint:commits:last`
 - Run format checks: `npm run format:check`
 - Format the repo: `npm run format`
 - Run tests: `npm run test`
+- Run the CI-equivalent local gate: `npm run ci`
+- Generate the changelog: `npm run changelog`
+- Preview unreleased changelog entries: `npm run changelog:unreleased`
+- Preview release notes for the current tag: `npm run release:notes:current`
 - Run the full quality gate: `npm run check`
+- Install local Git hooks: `npm run prepare` (also runs automatically after `npm install`)
 - Start the MCP server over stdio: `npm start`
 - Open it in MCP Inspector: `npm run inspector`
 
@@ -38,6 +44,7 @@ The current tool surface is intentionally read-only and maps to endpoints alread
 
 - Default to `PAPERCLIP_BASE_URL=http://127.0.0.1:3100` and keep it configurable via environment variable rather than hardcoding other hosts.
 - Use the repo-local Node version from `.nvmrc` before running project commands; `.nvmrc` intentionally tracks the latest Node LTS via `lts/*`.
+- Copy `.env.example` to `.env` when you need to override the default local Paperclip target.
 - Prefer **service-prefixed snake_case tool names** such as `paperclip_get_health` and `paperclip_list_companies`.
 - Keep Paperclip endpoint access inside `PaperclipClient`; tool handlers should compose client calls and presentation logic rather than calling `fetch` directly.
 - Each tool should support `response_format` so callers can choose markdown for human-readable output or json for structured output, while still returning `structuredContent` for machine-readable clients.
@@ -48,3 +55,7 @@ The current tool surface is intentionally read-only and maps to endpoints alread
 - Return actionable tool errors that mention the Paperclip base URL and whether the endpoint failed or returned non-JSON; do not swallow upstream failures.
 - Keep write tools, routines control, and wizard flows behind explicit guardrails once they land.
 - When adding major new tool families, keep `docs/board-assistant-roadmap.md` and `docs/architecture.md` in sync with what has shipped and what remains planned.
+- The repository uses a lightweight Git Flow model: `main` is the stable branch, `develop` is the integration branch, and feature branches should start from `develop`.
+- Husky hooks are part of the contributor workflow: pre-commit checks formatting and linting, commit-msg enforces Conventional Commits, and pre-push runs the test suite.
+- Release notes are generated with `git-cliff`, configured in `cliff.toml`, so semantic commit history is now part of the repository contract.
+- GitHub release automation is split into two workflows: `release-prepare.yml` prepares a release branch from `develop`, and `release-publish.yml` publishes a tagged GitHub Release from `main`.
