@@ -2,9 +2,8 @@
 
 ## Prerequisites
 
-- `nvm use`
 - `npm install`
-- `cp .env.example .env`
+- `cp packages/mcp/.env.example .env`
 - a local PaperclipAI instance available at `http://127.0.0.1:3100`, or set `PAPERCLIP_BASE_URL`
 
 `npm install` installs the local Husky hooks automatically.
@@ -29,6 +28,7 @@ Useful commands:
 - `npm run format:check`
 - `npm run test`
 - `npm run check`
+- `npm run package:plugin`
 
 ## Git workflow
 
@@ -91,11 +91,12 @@ Examples:
 
 ## Architecture rules
 
-- Keep all Paperclip HTTP calls in `src/services/paperclip-client.ts`.
-- Keep MCP tool registration and response shaping in `src/tools/`.
+- Keep all Paperclip HTTP calls in `packages/mcp/src/services/paperclip-client.ts`.
+- Keep MCP tool registration and response shaping in `packages/mcp/src/tools/`.
 - Prefer reusable schemas and render helpers over duplicating inline logic in tool handlers.
 - Preserve `response_format`, markdown output, JSON output, and `structuredContent` for all user-facing tools.
-- Add tests for any new configuration parsing, rendering logic, pagination logic, or client behavior.
+- Add tests in `packages/mcp/test/` for any new configuration parsing, rendering logic, pagination logic, or client behavior.
+- Keep Copilot agent and skills source artifacts in `copilot/` and the publishable bundle inventory in `marketplace/plugin-bundle.json`.
 
 ## Documentation rules
 

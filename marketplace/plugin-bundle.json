@@ -1,0 +1,32 @@
+{
+  "schema": "paperclip.bundle/v1",
+  "plugin": {
+    "id": "paperclip-board-assistant",
+    "name": "Paperclip Board Assistant",
+    "version": "0.1.0",
+    "description": "Publishable Copilot plugin bundle composed of MCP, agent, and skills artifacts."
+  },
+  "components": {
+    "mcp": {
+      "package_manifest": "packages/mcp/package.json",
+      "build_output": "packages/mcp/dist",
+      "environment_example": "packages/mcp/.env.example"
+    },
+    "agent": {
+      "manifest": "copilot/agent/manifest.json",
+      "instructions": "copilot/agent/instructions.md"
+    },
+    "skills": [
+      "copilot/skills/company-governance-review/skill.json",
+      "copilot/skills/company-governance-review/SKILL.md",
+      "copilot/skills/company-metrics-review/skill.json",
+      "copilot/skills/company-metrics-review/SKILL.md"
+    ]
+  },
+  "documentation": [
+    "README.md",
+    "LICENSE",
+    "docs/architecture.md",
+    "docs/board-assistant-roadmap.md"
+  ]
+}

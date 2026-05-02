@@ -1,6 +1,6 @@
-# paperclip-mcp-server
+# paperclip-board-assistant
 
-TypeScript MCP server for PaperclipAI, designed to grow into a **board assistant** and onboarding / restructuring companion for Paperclip companies.
+Workspace for a publishable Copilot plugin around PaperclipAI, designed to grow into a **board assistant** and onboarding / restructuring companion for Paperclip companies.
 
 The current version covers confirmed read-only Paperclip endpoints:
 
@@ -35,9 +35,8 @@ See:
 ## Installation
 
 ```bash
-nvm use
 npm install
-cp .env.example .env
+cp packages/mcp/.env.example .env
 ```
 
 ## Development
@@ -47,6 +46,14 @@ npm run dev
 ```
 
 `npm install` also installs local Husky hooks so formatting, linting, and tests fail earlier in contributor workflows.
+
+## Plugin workspace layout
+
+- `packages/mcp`: the MCP runtime package and its tests
+- `copilot/agent`: Copilot-side agent metadata and instructions
+- `copilot/skills`: publishable skills/prompts layered above the MCP
+- `marketplace/plugin-bundle.json`: the plugin bundle inventory used for staging publishable artifacts
+- `scripts/package-plugin.mjs`: stages the publishable bundle into `dist/marketplace/`
 
 ## Quality commands
 
@@ -75,7 +82,7 @@ By default, the server uses `PAPERCLIP_BASE_URL=http://127.0.0.1:3100`.
 
 The `.nvmrc` file uses `lts/*` to follow the latest Node.js LTS supported by `nvm`.
 
-Copy `.env.example` to `.env` when you want to override the default local Paperclip instance URL.
+Copy `packages/mcp/.env.example` to `.env` when you want to override the default local Paperclip instance URL.
 
 ## Environment variables
 
@@ -90,11 +97,26 @@ Copy `.env.example` to `.env` when you want to override the default local Paperc
 - `paperclip_get_profile`
 - `paperclip_get_company`
 - `paperclip_get_company_board_summary`
+- `paperclip_get_company_metrics`
+- `paperclip_get_company_policies`
 - `paperclip_list_companies`
 - `paperclip_list_adapters`
 - `paperclip_list_plugins`
 
-`list_*` tools accept `limit`, `offset`, and `response_format`. `paperclip_get_company` and `paperclip_get_company_board_summary` also accept an optional `company_id`, and otherwise auto-select the sole visible company.
+`list_*` tools accept `limit`, `offset`, and `response_format`. `paperclip_get_company`, `paperclip_get_company_board_summary`, `paperclip_get_company_metrics`, and `paperclip_get_company_policies` also accept an optional `company_id`, and otherwise auto-select the sole visible company.
+
+## Marketplace packaging
+
+```bash
+npm run package:plugin
+```
+
+This stages a publishable plugin bundle in `dist/marketplace/paperclip-board-assistant/` using `marketplace/plugin-bundle.json` as the source of truth for:
+
+- MCP build output
+- agent manifest and instructions
+- shipped skills
+- required documentation artifacts
 
 ## MCP Inspector
 
@@ -104,13 +126,15 @@ npm run inspector
 
 ## Architecture
 
-- `src/index.ts`: stdio bootstrap and process entrypoint
-- `src/config.ts`: runtime config parsing and validation
-- `src/server.ts`: MCP server assembly
-- `src/services/paperclip-client.ts`: Paperclip HTTP client and API error boundary
-- `src/tools/`: tool registration, helpers, and markdown renderers
-- `src/schemas.ts`: shared Zod schemas for the current read-only tools
-- `src/types.ts`: response contracts for the current Paperclip resource surface
+- `packages/mcp/src/index.ts`: stdio bootstrap and process entrypoint
+- `packages/mcp/src/config.ts`: runtime config parsing and validation
+- `packages/mcp/src/server.ts`: MCP server assembly
+- `packages/mcp/src/services/paperclip-client.ts`: Paperclip HTTP client and API error boundary
+- `packages/mcp/src/tools/`: tool registration, insight builders, helpers, and markdown renderers
+- `packages/mcp/src/schemas.ts`: shared Zod schemas for the current read-only tools
+- `packages/mcp/src/types.ts`: response contracts for the current Paperclip resource surface
+- `copilot/agent/`: Copilot-side board assistant definition
+- `copilot/skills/`: prompt-backed skills that orchestrate the MCP surface
 
 ## Repository standards
 

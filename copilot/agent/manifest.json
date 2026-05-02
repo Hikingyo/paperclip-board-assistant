@@ -1,0 +1,13 @@
+{
+  "id": "paperclip-board-assistant",
+  "name": "Paperclip Board Assistant",
+  "version": "0.1.0",
+  "description": "Copilot-side board assistant that supervises Paperclip companies through the bundled MCP surface.",
+  "instructions": "instructions.md",
+  "mcp_component": "../../packages/mcp/package.json",
+  "skills": [
+    "../skills/company-governance-review/skill.json",
+    "../skills/company-metrics-review/skill.json"
+  ],
+  "capabilities": ["company_visibility", "governance_review", "board_metrics_review"]
+}

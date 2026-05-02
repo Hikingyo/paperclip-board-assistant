@@ -2,12 +2,18 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 import { companyReadOnlyGetSchema, readOnlyGetSchema, readOnlyListSchema } from "../schemas.js";
 import type { PaperclipClient } from "../services/paperclip-client.js";
-import type { PaperclipCompany, PaperclipCompanyBoardSummary } from "../types.js";
+import {
+  buildCompanyBoardSummary,
+  buildCompanyMetrics,
+  buildCompanyPolicies,
+} from "./paperclip-company-insights.js";
 import {
   renderAdapters,
   renderCompanies,
   renderCompany,
   renderCompanyBoardSummary,
+  renderCompanyMetrics,
+  renderCompanyPolicies,
   renderHealth,
   renderPlugins,
   renderProfile,
@@ -21,42 +27,10 @@ import {
   selectText,
 } from "./paperclip-tool-helpers.js";
 
-function buildCompanyBoardSummary(company: PaperclipCompany): PaperclipCompanyBoardSummary {
-  const budgetRemaining =
-    company.budgetMonthlyCents > 0 ? company.budgetMonthlyCents - company.spentMonthlyCents : null;
-  const budgetUtilization =
-    company.budgetMonthlyCents > 0
-      ? Number(((company.spentMonthlyCents / company.budgetMonthlyCents) * 100).toFixed(1))
-      : null;
-  const boardFlags: string[] = [];
-
-  if (company.requireBoardApprovalForNewAgents) {
-    boardFlags.push("New agent creation is gated behind board approval.");
-  }
-
-  if (company.budgetMonthlyCents <= 0) {
-    boardFlags.push("Monthly budget is not configured.");
-  } else if (company.spentMonthlyCents > company.budgetMonthlyCents) {
-    boardFlags.push("Monthly spend is above the configured budget.");
-  }
-
-  if (!company.feedbackDataSharingEnabled) {
-    boardFlags.push("Feedback data sharing is disabled.");
-  }
-
-  return {
-    company,
-    budget_remaining_cents: budgetRemaining,
-    budget_utilization_percent: budgetUtilization,
-    next_issue_number: company.issueCounter + 1,
-    board_flags: boardFlags,
-  };
-}
-
 async function resolveCompany(
   client: PaperclipClient,
   companyId?: string,
-): Promise<PaperclipCompany> {
+): Promise<Awaited<ReturnType<PaperclipClient["listCompanies"]>>[number]> {
   const companies = await client.listCompanies();
 
   return resolveRequestedItem(companies, {
@@ -182,6 +156,62 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
         return createTextResult(
           selectText(response_format, summary, renderCompanyBoardSummary),
           summary,
+        );
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_company_metrics",
+    {
+      title: "Get Paperclip company metrics",
+      description:
+        "Read derived budget, issue, and attachment metrics for a visible company using company metadata already exposed by Paperclip.",
+      inputSchema: companyReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id: companyId, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, companyId);
+        const metrics = buildCompanyMetrics(company);
+        return createTextResult(
+          selectText(response_format, metrics, renderCompanyMetrics),
+          metrics,
+        );
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_company_policies",
+    {
+      title: "Get Paperclip company policies",
+      description:
+        "Read governance and policy signals for a visible company using company metadata already exposed by Paperclip.",
+      inputSchema: companyReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id: companyId, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, companyId);
+        const policies = buildCompanyPolicies(company);
+        return createTextResult(
+          selectText(response_format, policies, renderCompanyPolicies),
+          policies,
         );
       } catch (error) {
         return createErrorResult(error);
