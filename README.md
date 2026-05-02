@@ -37,6 +37,7 @@ See:
 ```bash
 nvm use
 npm install
+cp .env.example .env
 ```
 
 ## Development
@@ -45,16 +46,23 @@ npm install
 npm run dev
 ```
 
+`npm install` also installs local Husky hooks so formatting, linting, and tests fail earlier in contributor workflows.
+
 ## Quality commands
 
 ```bash
 npm run build
 npm run typecheck
+npm run lint:commits:last
 npm run lint
 npm run format
 npm run format:check
 npm run test
+npm run ci
 npm run check
+npm run changelog
+npm run changelog:unreleased
+npm run release:notes:current
 ```
 
 ## Run the MCP server
@@ -66,6 +74,8 @@ npm start
 By default, the server uses `PAPERCLIP_BASE_URL=http://127.0.0.1:3100`.
 
 The `.nvmrc` file uses `lts/*` to follow the latest Node.js LTS supported by `nvm`.
+
+Copy `.env.example` to `.env` when you want to override the default local Paperclip instance URL.
 
 ## Environment variables
 
@@ -104,11 +114,29 @@ npm run inspector
 
 ## Repository standards
 
-- GitHub Actions CI runs `npm run check`
+- GitHub Actions CI runs `npm run ci` on `main`, `develop`, and pull requests
+- commit messages follow Conventional Commits and are linted locally and in CI
+- changelog generation uses `git-cliff` and `cliff.toml`
 - Dependabot is enabled for npm and GitHub Actions
 - issue templates and a pull request template are included
 - contribution workflow is documented in `CONTRIBUTING.md`
 - the repository uses a lightweight Git Flow model with `main` and `develop`
+
+## Governance
+
+- `CODE_OF_CONDUCT.md`: contributor behavior expectations
+- `SECURITY.md`: vulnerability disclosure process
+- `.github/CODEOWNERS`: default review ownership
+- `LICENSE`: MIT license for open source use and redistribution
+
+## Releases
+
+- Use Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `ci:`...)
+- Generate or refresh `CHANGELOG.md` with `npm run changelog`
+- Preview only unreleased entries with `npm run changelog:unreleased`
+- Preview the current tagged release notes with `npm run release:notes:current`
+- Run the **Prepare Release** GitHub workflow from `develop` to create a `release/vX.Y.Z` branch and PR into `main`
+- After merging the release PR into `main`, run the **Publish Release** GitHub workflow to create the tag, GitHub Release notes, and release artifact
 
 ## Roadmap
 
