@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildCompanyActivityFeed,
   buildCompanyBoardSummary,
   buildCompanyMetrics,
   buildCompanyPolicies,
@@ -8,6 +9,7 @@ import {
 import {
   renderCompanies,
   renderCompany,
+  renderCompanyActivityFeed,
   renderCompanyBoardSummary,
   renderCompanyMetrics,
   renderCompanyPolicies,
@@ -239,6 +241,65 @@ describe("paperclip renderers", () => {
     ]);
   });
 
+  it("derives a company activity feed from visible metadata", () => {
+    expect(
+      buildCompanyActivityFeed({
+        id: "company-1",
+        name: "Acme",
+        description: null,
+        status: "active",
+        issuePrefix: "ACM",
+        issueCounter: 10,
+        budgetMonthlyCents: 100_000,
+        spentMonthlyCents: 125_000,
+        attachmentMaxBytes: 1024,
+        requireBoardApprovalForNewAgents: true,
+        feedbackDataSharingEnabled: true,
+        feedbackDataSharingConsentAt: "2026-01-03T00:00:00.000Z",
+        feedbackDataSharingConsentByUserId: "user-1",
+        feedbackDataSharingTermsVersion: "2026-01",
+        brandColor: null,
+        logoAssetId: null,
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-04T00:00:00.000Z",
+        logoUrl: null,
+      }),
+    ).toMatchObject({
+      derived_from: "visible_company_metadata",
+      total_events: 5,
+      latest_event_at: "2026-01-04T00:00:00.000Z",
+      activity: [
+        {
+          id: "board-flag-1",
+          kind: "board_flag",
+          title: "Board signal visible in latest snapshot",
+          summary: "New agent creation is gated behind board approval.",
+        },
+        {
+          id: "board-flag-2",
+          kind: "board_flag",
+          title: "Board signal visible in latest snapshot",
+          summary: "Monthly spend is above the configured budget.",
+        },
+        {
+          id: "company-metadata-updated",
+          kind: "lifecycle",
+          title: "Company metadata updated",
+        },
+        {
+          id: "feedback-data-sharing-consent-recorded",
+          kind: "governance",
+          title: "Feedback sharing consent recorded",
+        },
+        {
+          id: "company-created",
+          kind: "lifecycle",
+          title: "Company created",
+        },
+      ],
+    });
+  });
+
   it("keeps board summary aligned with shared company insights", () => {
     expect(
       buildCompanyBoardSummary({
@@ -337,5 +398,52 @@ describe("paperclip renderers", () => {
         ],
       }),
     ).toContain("Feedback data sharing is enabled but consent metadata is incomplete.");
+  });
+
+  it("renders company activity feed entries in order", () => {
+    expect(
+      renderCompanyActivityFeed({
+        company: {
+          id: "company-1",
+          name: "Acme",
+          description: null,
+          status: "active",
+          issuePrefix: "ACM",
+          issueCounter: 10,
+          budgetMonthlyCents: 100_000,
+          spentMonthlyCents: 125_000,
+          attachmentMaxBytes: 1024,
+          requireBoardApprovalForNewAgents: true,
+          feedbackDataSharingEnabled: true,
+          feedbackDataSharingConsentAt: "2026-01-03T00:00:00.000Z",
+          feedbackDataSharingConsentByUserId: "user-1",
+          feedbackDataSharingTermsVersion: "2026-01",
+          brandColor: null,
+          logoAssetId: null,
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-04T00:00:00.000Z",
+          logoUrl: null,
+        },
+        derived_from: "visible_company_metadata",
+        total_events: 2,
+        latest_event_at: "2026-01-04T00:00:00.000Z",
+        activity: [
+          {
+            id: "company-metadata-updated",
+            kind: "lifecycle",
+            occurred_at: "2026-01-04T00:00:00.000Z",
+            title: "Company metadata updated",
+            summary: "Latest visible metadata shows status active and issue counter 10.",
+          },
+          {
+            id: "company-created",
+            kind: "lifecycle",
+            occurred_at: "2026-01-01T00:00:00.000Z",
+            title: "Company created",
+            summary: "Acme became visible with status active.",
+          },
+        ],
+      }),
+    ).toContain("Company metadata updated");
   });
 });

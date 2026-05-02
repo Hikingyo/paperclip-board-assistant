@@ -1,5 +1,7 @@
 import type {
   PaperclipCompany,
+  PaperclipCompanyActivityEvent,
+  PaperclipCompanyActivityFeed,
   PaperclipCompanyBoardSummary,
   PaperclipCompanyBudgetStatus,
   PaperclipCompanyMetrics,
@@ -95,5 +97,72 @@ export function buildCompanyPolicies(company: PaperclipCompany): PaperclipCompan
     logo_asset_id: company.logoAssetId,
     logo_url: company.logoUrl,
     governance_flags: getGovernanceFlags(company),
+  };
+}
+
+function compareActivityEvents(
+  left: PaperclipCompanyActivityEvent,
+  right: PaperclipCompanyActivityEvent,
+): number {
+  const byTimestamp = right.occurred_at.localeCompare(left.occurred_at);
+  if (byTimestamp !== 0) {
+    return byTimestamp;
+  }
+
+  return left.id.localeCompare(right.id);
+}
+
+export function buildCompanyActivityFeed(company: PaperclipCompany): PaperclipCompanyActivityFeed {
+  const boardSummary = buildCompanyBoardSummary(company);
+  const activity: PaperclipCompanyActivityEvent[] = [
+    {
+      id: "company-created",
+      kind: "lifecycle",
+      occurred_at: company.createdAt,
+      title: "Company created",
+      summary: `${company.name} became visible with status ${company.status}.`,
+    },
+  ];
+
+  if (company.updatedAt !== company.createdAt) {
+    activity.push({
+      id: "company-metadata-updated",
+      kind: "lifecycle",
+      occurred_at: company.updatedAt,
+      title: "Company metadata updated",
+      summary: `Latest visible metadata shows status ${company.status} and issue counter ${company.issueCounter}.`,
+    });
+  }
+
+  if (company.feedbackDataSharingEnabled && company.feedbackDataSharingConsentAt) {
+    activity.push({
+      id: "feedback-data-sharing-consent-recorded",
+      kind: "governance",
+      occurred_at: company.feedbackDataSharingConsentAt,
+      title: "Feedback sharing consent recorded",
+      summary: `Consent was recorded for terms version ${
+        company.feedbackDataSharingTermsVersion ?? "unknown"
+      } by user ${company.feedbackDataSharingConsentByUserId ?? "unknown"}.`,
+    });
+  }
+
+  activity.push(
+    ...boardSummary.board_flags.map((flag, index) => ({
+      id: `board-flag-${index + 1}`,
+      kind: "board_flag" as const,
+      occurred_at: company.updatedAt,
+      title: "Board signal visible in latest snapshot",
+      summary: flag,
+    })),
+  );
+
+  activity.sort(compareActivityEvents);
+
+  return {
+    company,
+    derived_from: "visible_company_metadata",
+    total_events: activity.length,
+    latest_event_at: activity[0]?.occurred_at ?? null,
+    activity,
   };
 }

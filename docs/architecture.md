@@ -54,11 +54,11 @@ This project is a **TypeScript MCP server** that speaks **stdio** and delegates 
 
 6. **Shared tool utilities**
    - `packages/mcp/src/tools/paperclip-tool-helpers.ts`
-   - result helpers, pagination, response selection, and error shaping
+    - result helpers, pagination, response selection, and error shaping
    - `packages/mcp/src/tools/paperclip-renderers.ts`
-   - markdown renderers for Paperclip resources
+    - markdown renderers for Paperclip resources
    - `packages/mcp/src/tools/paperclip-company-insights.ts`
-   - shared derived company visibility views such as board summary, metrics, and policies
+    - shared derived company visibility views such as board summary, activity feed, metrics, and policies
 
 7. **Contracts**
    - `packages/mcp/src/types.ts`

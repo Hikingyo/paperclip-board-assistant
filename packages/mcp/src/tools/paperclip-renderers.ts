@@ -2,6 +2,7 @@ import type {
   PaginatedResult,
   PaperclipAdapter,
   PaperclipCompany,
+  PaperclipCompanyActivityFeed,
   PaperclipCompanyBoardSummary,
   PaperclipCompanyMetrics,
   PaperclipCompanyPolicies,
@@ -191,6 +192,32 @@ export function renderCompanyPolicies(policies: PaperclipCompanyPolicies): strin
     ...(governanceFlags.length
       ? governanceFlags.map((flag) => `- ${flag}`)
       : ["- No immediate governance flags derived from company metadata."]),
+  ].join("\n");
+}
+
+export function renderCompanyActivityFeed(feed: PaperclipCompanyActivityFeed): string {
+  const { company } = feed;
+  const activityBlocks = feed.activity.map((event) =>
+    [
+      `## ${event.title}`,
+      `- **Occurred at**: ${event.occurred_at}`,
+      `- **Kind**: ${event.kind}`,
+      `- **Summary**: ${event.summary}`,
+    ].join("\n"),
+  );
+
+  return [
+    `# Company activity feed: ${company.name}`,
+    "",
+    `- **Company ID**: ${company.id}`,
+    `- **Derived from**: ${feed.derived_from}`,
+    `- **Total events**: ${feed.total_events}`,
+    `- **Latest event at**: ${feed.latest_event_at ?? "None"}`,
+    "",
+    "## Activity",
+    ...(activityBlocks.length
+      ? activityBlocks
+      : ["No derived activity is available from the visible company metadata."]),
   ].join("\n");
 }
 
