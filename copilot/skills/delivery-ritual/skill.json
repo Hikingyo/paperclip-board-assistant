@@ -1,6 +1,0 @@
-{
-  "name": "delivery-ritual",
-  "version": "0.1.0",
-  "description": "Run the repository delivery ritual: final checks, commit, push, and pull request creation on the Git Flow branch model.",
-  "prompt": "SKILL.md"
-}
