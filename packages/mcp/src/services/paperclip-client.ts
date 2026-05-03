@@ -4,6 +4,7 @@ import type {
   PaperclipAgent,
   PaperclipCompany,
   PaperclipHealth,
+  PaperclipIssue,
   PaperclipPlugin,
   PaperclipProfile,
   PaperclipProject,
@@ -85,6 +86,23 @@ export class PaperclipClient {
       );
     }
     return project;
+  }
+
+  async getCompanyIssues(companyId: string): Promise<PaperclipIssue[]> {
+    return this.getJson(`/api/companies/${companyId}/issues`);
+  }
+
+  async getCompanyIssue(companyId: string, issueId: string): Promise<PaperclipIssue> {
+    const issues = await this.getCompanyIssues(companyId);
+    const issue = issues.find((i) => i.id === issueId);
+    if (!issue) {
+      throw new PaperclipApiError(
+        `Issue ${issueId} not found in company ${companyId}.`,
+        `/api/companies/${companyId}/issues/${issueId}`,
+        404,
+      );
+    }
+    return issue;
   }
 
   private async getJson<T>(path: string): Promise<T> {
