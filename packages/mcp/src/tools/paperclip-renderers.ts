@@ -9,6 +9,7 @@ import type {
   PaperclipCompanyMetrics,
   PaperclipCompanyPolicies,
   PaperclipHealth,
+  PaperclipIssue,
   PaperclipPlugin,
   PaperclipProfile,
   PaperclipProject,
@@ -417,6 +418,72 @@ export function renderProject(project: PaperclipProject): string {
 
   lines.push(`**Created**: ${project.createdAt}`);
   lines.push(`**URL**: ${project.urlKey}`);
+
+  return lines.join("\n");
+}
+
+export function renderIssues(page: PaginatedResult<PaperclipIssue>): string {
+  const issueLines = page.items
+    .map(
+      (issue) =>
+        `- [${issue.identifier}](${issue.identifier}) **${issue.title}** (${issue.status}) [${issue.priority}]${issue.assigneeAgentId ? ` - Assigned` : ""}`,
+    )
+    .join("\n");
+
+  return [
+    "# Issues/Tasks",
+    "",
+    `Showing ${page.count} of ${page.total} issues from offset ${page.offset}.`,
+    "",
+    issueLines.length ? issueLines : "No issues found.",
+  ].join("\n");
+}
+
+export function renderIssue(issue: PaperclipIssue): string {
+  const lines = [
+    `# ${issue.identifier}: ${issue.title}`,
+    `**Status**: ${issue.status} | **Priority**: ${issue.priority}`,
+    "",
+  ];
+
+  if (issue.description) {
+    lines.push("## Description");
+    lines.push(issue.description);
+    lines.push("");
+  }
+
+  if (issue.assigneeAgentId) {
+    lines.push(`**Assigned to**: Agent ${issue.assigneeAgentId}`);
+  }
+
+  if (issue.parentId) {
+    lines.push(`**Parent Issue**: ${issue.parentId}`);
+  }
+
+  if (issue.blockerAttention.unresolvedBlockerCount > 0) {
+    lines.push(
+      `**Blocked by**: ${issue.blockerAttention.unresolvedBlockerCount} unresolved blocker(s)`,
+    );
+  }
+
+  if (issue.labels.length) {
+    lines.push(`**Labels**: ${issue.labels.map((l) => l.name).join(", ")}`);
+  }
+
+  if (issue.startedAt) {
+    lines.push(`**Started**: ${issue.startedAt}`);
+  }
+
+  if (issue.completedAt) {
+    lines.push(`**Completed**: ${issue.completedAt}`);
+  }
+
+  if (issue.projectId) {
+    lines.push(`**Project**: ${issue.projectId}`);
+  }
+
+  lines.push(`**Created**: ${issue.createdAt}`);
+  lines.push(`**Last Activity**: ${issue.lastActivityAt ?? "None"}`);
 
   return lines.join("\n");
 }

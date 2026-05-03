@@ -260,6 +260,52 @@ export interface PaperclipProject extends Record<string, unknown> {
   primaryWorkspace: PaperclipWorkspace;
 }
 
+export interface PaperclipIssue extends Record<string, unknown> {
+  id: string;
+  companyId: string;
+  projectId: string | null;
+  projectWorkspaceId: string | null;
+  goalId: string | null;
+  parentId: string | null;
+  title: string;
+  description: string | null;
+  status: "open" | "in_progress" | "in_review" | "done" | "cancelled";
+  priority: "trivial" | "low" | "medium" | "high" | "critical";
+  assigneeAgentId: string | null;
+  assigneeUserId: string | null;
+  createdByAgentId: string | null;
+  createdByUserId: string | null;
+  issueNumber: number;
+  identifier: string;
+  originKind: string;
+  originId: string | null;
+  requestDepth: number;
+  billingCode: string | null;
+  executionPolicy: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  hiddenAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  labels: Array<{
+    id: string;
+    name: string;
+  }>;
+  labelIds: string[];
+  lastActivityAt: string | null;
+  blockerAttention: {
+    state: string;
+    reason: string | null;
+    unresolvedBlockerCount: number;
+    coveredBlockerCount: number;
+    stalledBlockerCount: number;
+    attentionBlockerCount: number;
+    sampleBlockerIdentifier: string | null;
+    sampleStalledBlockerIdentifier: string | null;
+  };
+}
+
 export interface PaginatedResult<T> extends Record<string, unknown> {
   total: number;
   count: number;

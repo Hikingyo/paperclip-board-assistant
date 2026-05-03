@@ -4,6 +4,7 @@ import {
   agentReadOnlyGetSchema,
   companyReadOnlyGetSchema,
   companyReadOnlyListSchema,
+  issueReadOnlyGetSchema,
   projectReadOnlyGetSchema,
   readOnlyGetSchema,
   readOnlyListSchema,
@@ -28,6 +29,8 @@ import {
   renderCompanyMetrics,
   renderCompanyPolicies,
   renderHealth,
+  renderIssue,
+  renderIssues,
   renderPlugins,
   renderProfile,
   renderProject,
@@ -467,6 +470,54 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
         const company = await resolveCompany(client, company_id);
         const project = await client.getCompanyProject(company.id, project_id);
         return createTextResult(selectText(response_format, project, renderProject), project);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_list_issues",
+    {
+      description: "List issues/tasks in a company with pagination.",
+      inputSchema: companyReadOnlyListSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const issues = await client.getCompanyIssues(company.id);
+        const page = paginate(issues, limit, offset);
+        const structured = { ...page, issues: page.items };
+        return createTextResult(selectText(response_format, structured, renderIssues), structured);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_issue",
+    {
+      description: "Get details about a specific issue/task in a company.",
+      inputSchema: issueReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, issue_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const issue = await client.getCompanyIssue(company.id, issue_id);
+        return createTextResult(selectText(response_format, issue, renderIssue), issue);
       } catch (error) {
         return createErrorResult(error);
       }
