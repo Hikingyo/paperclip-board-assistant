@@ -4,6 +4,7 @@ import type {
   PaperclipCompany,
   PaperclipCompanyActivityFeed,
   PaperclipCompanyBoardSummary,
+  PaperclipCompanyExecutionSummary,
   PaperclipCompanyMetrics,
   PaperclipCompanyPolicies,
   PaperclipHealth,
@@ -32,6 +33,10 @@ function formatBudgetStatus(value: PaperclipCompanyMetrics["budget_status"]): st
     default:
       return "Within budget";
   }
+}
+
+function formatBudgetUtilization(value: number | null): string {
+  return `${value ?? "Not set"}${value === null ? "" : "%"}`;
 }
 
 function renderCompanyFacts(company: PaperclipCompany): string[] {
@@ -267,19 +272,20 @@ export function renderPlugins(page: PaginatedResult<PaperclipPlugin>): string {
 }
 
 export function renderCompanyExecutionSummary(summary: PaperclipCompanyExecutionSummary): string {
-  const companyBlocks = summary.companies.map((company) =>
-    [
-      `## ${company.company_name} (${company.company_id})`,
-      `- **Status**: ${company.status}`,
-      `- **Board attention needed**: ${company.board_attention_needed}`,
-      `- **Budget status**: ${formatBudgetStatus(company.budget_status)}`,
-      `- **Budget utilization**: ${formatBudgetUtilization(company.budget_utilization_percent)}`,
-      `- **Budget remaining**: ${formatCurrencyFromCents(company.budget_remaining_cents)}`,
-      `- **Last updated**: ${company.last_updated_at}`,
-      ...(company.board_flags.length
-        ? ["- **Board flags**:", ...company.board_flags.map((flag) => `  - ${flag}`)]
-        : ["- **Board flags**: None"]),
-    ].join("\n"),
+  const companyBlocks = summary.companies.map(
+    (company: PaperclipCompanyExecutionSummary["companies"][number]) =>
+      [
+        `## ${company.company_name} (${company.company_id})`,
+        `- **Status**: ${company.status}`,
+        `- **Board attention needed**: ${company.board_attention_needed}`,
+        `- **Budget status**: ${formatBudgetStatus(company.budget_status)}`,
+        `- **Budget utilization**: ${formatBudgetUtilization(company.budget_utilization_percent)}`,
+        `- **Budget remaining**: ${formatCurrencyFromCents(company.budget_remaining_cents)}`,
+        `- **Last updated**: ${company.last_updated_at}`,
+        ...(company.board_flags.length
+          ? ["- **Board flags**:", ...company.board_flags.map((flag: string) => `  - ${flag}`)]
+          : ["- **Board flags**: None"]),
+      ].join("\n"),
   );
 
   return [
@@ -298,7 +304,7 @@ export function renderCompanyExecutionSummary(summary: PaperclipCompanyExecution
     "",
     "## Portfolio flags",
     ...(summary.portfolio_flags.length
-      ? summary.portfolio_flags.map((flag) => `- ${flag}`)
+      ? summary.portfolio_flags.map((flag: string) => `- ${flag}`)
       : ["- No immediate portfolio flags derived from visible company metadata."]),
     "",
     "## Company focus",

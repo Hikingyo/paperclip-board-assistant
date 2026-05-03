@@ -11,6 +11,7 @@ import {
   renderCompany,
   renderCompanyActivityFeed,
   renderCompanyBoardSummary,
+  renderCompanyExecutionSummary,
   renderCompanyMetrics,
   renderCompanyPolicies,
   renderSession,
@@ -446,7 +447,6 @@ describe("paperclip renderers", () => {
       }),
     ).toContain("Company metadata updated");
   });
-});
 
   it("renders a company execution summary with company focus", () => {
     expect(
@@ -489,3 +489,4 @@ describe("paperclip renderers", () => {
       }),
     ).toContain("## Acme (company-1)");
   });
+});
