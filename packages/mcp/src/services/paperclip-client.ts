@@ -6,6 +6,7 @@ import type {
   PaperclipHealth,
   PaperclipPlugin,
   PaperclipProfile,
+  PaperclipProject,
   PaperclipSession,
 } from "../types.js";
 
@@ -67,6 +68,23 @@ export class PaperclipClient {
       );
     }
     return agent;
+  }
+
+  async getCompanyProjects(companyId: string): Promise<PaperclipProject[]> {
+    return this.getJson(`/api/companies/${companyId}/projects`);
+  }
+
+  async getCompanyProject(companyId: string, projectId: string): Promise<PaperclipProject> {
+    const projects = await this.getCompanyProjects(companyId);
+    const project = projects.find((p) => p.id === projectId);
+    if (!project) {
+      throw new PaperclipApiError(
+        `Project ${projectId} not found in company ${companyId}.`,
+        `/api/companies/${companyId}/projects/${projectId}`,
+        404,
+      );
+    }
+    return project;
   }
 
   private async getJson<T>(path: string): Promise<T> {

@@ -11,6 +11,7 @@ import type {
   PaperclipHealth,
   PaperclipPlugin,
   PaperclipProfile,
+  PaperclipProject,
   PaperclipSession,
 } from "../types.js";
 
@@ -359,6 +360,63 @@ export function renderAgent(agent: PaperclipAgent): string {
 
   lines.push(`**Created**: ${agent.createdAt}`);
   lines.push(`**URL**: ${agent.urlKey}`);
+
+  return lines.join("\n");
+}
+
+export function renderProjects(page: PaginatedResult<PaperclipProject>): string {
+  const projectLines = page.items
+    .map(
+      (project) =>
+        `- **${project.name}** (${project.status})${project.description ? ` - ${project.description}` : ""}`,
+    )
+    .join("\n");
+
+  return [
+    "# Projects",
+    "",
+    `Showing ${page.count} of ${page.total} projects from offset ${page.offset}.`,
+    "",
+    projectLines.length ? projectLines : "No projects found.",
+  ].join("\n");
+}
+
+export function renderProject(project: PaperclipProject): string {
+  const lines = [
+    `# ${project.name}`,
+    `**Status**: ${project.status} | **Color**: ${project.color}`,
+    "",
+  ];
+
+  if (project.description) {
+    lines.push(`**Description**: ${project.description}`);
+  }
+
+  if (project.goals.length) {
+    lines.push("**Goals**:");
+    project.goals.forEach((goal) => {
+      lines.push(`- ${goal.title}`);
+    });
+  }
+
+  if (project.leadAgentId) {
+    lines.push(`**Lead Agent**: ${project.leadAgentId}`);
+  }
+
+  if (project.targetDate) {
+    lines.push(`**Target Date**: ${project.targetDate}`);
+  }
+
+  if (project.pauseReason) {
+    lines.push(`**Pause Reason**: ${project.pauseReason}`);
+  }
+
+  if (project.codebase?.repoUrl) {
+    lines.push(`**Repository**: ${project.codebase.repoUrl}`);
+  }
+
+  lines.push(`**Created**: ${project.createdAt}`);
+  lines.push(`**URL**: ${project.urlKey}`);
 
   return lines.join("\n");
 }
