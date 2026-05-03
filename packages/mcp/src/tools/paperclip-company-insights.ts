@@ -4,6 +4,8 @@ import type {
   PaperclipCompanyActivityFeed,
   PaperclipCompanyBoardSummary,
   PaperclipCompanyBudgetStatus,
+  PaperclipCompanyExecutionSummary,
+  PaperclipCompanyExecutionSummaryCompany,
   PaperclipCompanyMetrics,
   PaperclipCompanyPolicies,
 } from "../types.js";
@@ -165,4 +167,117 @@ export function buildCompanyActivityFeed(company: PaperclipCompany): PaperclipCo
     latest_event_at: activity[0]?.occurred_at ?? null,
     activity,
   };
+}
+
+function compareExecutionSummaryCompanies(
+  left: PaperclipCompanyExecutionSummaryCompany,
+  right: PaperclipCompanyExecutionSummaryCompany,
+): number {
+  if (left.board_attention_needed !== right.board_attention_needed) {
+    return Number(right.board_attention_needed) - Number(left.board_attention_needed);
+  }
+
+  return right.last_updated_at.localeCompare(left.last_updated_at);
+}
+
+function getPortfolioFlags(summary: PaperclipCompanyExecutionSummary): string[] {
+  const flags: string[] = [];
+
+  if (summary.total_companies === 0) {
+    flags.push("No companies are visible from the current Paperclip session.");
+  }
+
+  if (summary.companies_requiring_board_attention > 0) {
+    flags.push(
+      `${summary.companies_requiring_board_attention} visible compan${
+        summary.companies_requiring_board_attention === 1 ? "y requires" : "ies require"
+      } board attention.`,
+    );
+  }
+
+  if (summary.over_budget_companies > 0) {
+    flags.push(
+      `${summary.over_budget_companies} compan${
+        summary.over_budget_companies === 1 ? "y is" : "ies are"
+      } over budget.`,
+    );
+  }
+
+  if (summary.board_approval_gated_companies > 0) {
+    flags.push(
+      `New agent creation is board-gated in ${summary.board_approval_gated_companies} compan${
+        summary.board_approval_gated_companies === 1 ? "y" : "ies"
+      }.`,
+    );
+  }
+
+  if (summary.feedback_sharing_disabled_companies > 0) {
+    flags.push(
+      `Feedback data sharing is disabled in ${summary.feedback_sharing_disabled_companies} compan${
+        summary.feedback_sharing_disabled_companies === 1 ? "y" : "ies"
+      }.`,
+    );
+  }
+
+  return flags;
+}
+
+export function buildCompanyExecutionSummary(
+  companies: PaperclipCompany[],
+): PaperclipCompanyExecutionSummary {
+  const companySummaries = companies
+    .map((company) => {
+      const boardSummary = buildCompanyBoardSummary(company);
+      const metrics = buildCompanyMetrics(company);
+
+      return {
+        company_id: company.id,
+        company_name: company.name,
+        status: company.status,
+        budget_status: metrics.budget_status,
+        budget_utilization_percent: metrics.budget_utilization_percent,
+        budget_remaining_cents: metrics.budget_remaining_cents,
+        board_attention_needed: boardSummary.board_flags.length > 0,
+        board_flags: boardSummary.board_flags,
+        last_updated_at: company.updatedAt,
+      } satisfies PaperclipCompanyExecutionSummaryCompany;
+    })
+    .sort(compareExecutionSummaryCompanies);
+
+  const totalMonthlyBudgetCents = companies.reduce(
+    (sum, company) => sum + company.budgetMonthlyCents,
+    0,
+  );
+  const totalMonthlySpendCents = companies.reduce(
+    (sum, company) => sum + company.spentMonthlyCents,
+    0,
+  );
+
+  const summary: PaperclipCompanyExecutionSummary = {
+    derived_from: "visible_companies_metadata",
+    total_companies: companies.length,
+    active_companies: companies.filter((company) => company.status === "active").length,
+    companies_requiring_board_attention: companySummaries.filter(
+      (company) => company.board_attention_needed,
+    ).length,
+    over_budget_companies: companySummaries.filter(
+      (company) => company.budget_status === "over_budget",
+    ).length,
+    board_approval_gated_companies: companies.filter(
+      (company) => company.requireBoardApprovalForNewAgents,
+    ).length,
+    feedback_sharing_disabled_companies: companies.filter(
+      (company) => !company.feedbackDataSharingEnabled,
+    ).length,
+    total_monthly_budget_cents: totalMonthlyBudgetCents,
+    total_monthly_spend_cents: totalMonthlySpendCents,
+    total_budget_remaining_cents:
+      totalMonthlyBudgetCents > 0 ? totalMonthlyBudgetCents - totalMonthlySpendCents : null,
+    portfolio_flags: [],
+    companies: companySummaries,
+  };
+
+  summary.portfolio_flags = getPortfolioFlags(summary);
+
+  return summary;
 }

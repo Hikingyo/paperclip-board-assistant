@@ -106,6 +106,33 @@ export interface PaperclipCompanyActivityFeed extends Record<string, unknown> {
   activity: PaperclipCompanyActivityEvent[];
 }
 
+export interface PaperclipCompanyExecutionSummaryCompany extends Record<string, unknown> {
+  company_id: string;
+  company_name: string;
+  status: string;
+  budget_status: PaperclipCompanyBudgetStatus;
+  budget_utilization_percent: number | null;
+  budget_remaining_cents: number | null;
+  board_attention_needed: boolean;
+  board_flags: string[];
+  last_updated_at: string;
+}
+
+export interface PaperclipCompanyExecutionSummary extends Record<string, unknown> {
+  derived_from: "visible_companies_metadata";
+  total_companies: number;
+  active_companies: number;
+  companies_requiring_board_attention: number;
+  over_budget_companies: number;
+  board_approval_gated_companies: number;
+  feedback_sharing_disabled_companies: number;
+  total_monthly_budget_cents: number;
+  total_monthly_spend_cents: number;
+  total_budget_remaining_cents: number | null;
+  portfolio_flags: string[];
+  companies: PaperclipCompanyExecutionSummaryCompany[];
+}
+
 export interface PaperclipAdapter extends Record<string, unknown> {
   type: string;
   label: string;

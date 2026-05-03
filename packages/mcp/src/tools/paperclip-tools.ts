@@ -5,6 +5,7 @@ import type { PaperclipClient } from "../services/paperclip-client.js";
 import {
   buildCompanyActivityFeed,
   buildCompanyBoardSummary,
+  buildCompanyExecutionSummary,
   buildCompanyMetrics,
   buildCompanyPolicies,
 } from "./paperclip-company-insights.js";
@@ -14,6 +15,7 @@ import {
   renderCompany,
   renderCompanyActivityFeed,
   renderCompanyBoardSummary,
+  renderCompanyExecutionSummary,
   renderCompanyMetrics,
   renderCompanyPolicies,
   renderHealth,
@@ -107,6 +109,34 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
       try {
         const profile = await client.getProfile();
         return createTextResult(selectText(response_format, profile, renderProfile), profile);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_company_execution_summary",
+    {
+      title: "Get Paperclip company execution summary",
+      description:
+        "Read a workflow-oriented execution summary across all visible companies using metadata already exposed by Paperclip.",
+      inputSchema: readOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ response_format = "markdown" }) => {
+      try {
+        const companies = await client.listCompanies();
+        const summary = buildCompanyExecutionSummary(companies);
+        return createTextResult(
+          selectText(response_format, summary, renderCompanyExecutionSummary),
+          summary,
+        );
       } catch (error) {
         return createErrorResult(error);
       }
