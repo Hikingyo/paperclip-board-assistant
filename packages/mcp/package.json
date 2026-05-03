@@ -23,6 +23,11 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "nunjucks": "^3.2.4",
+    "winston": "^3.19.0",
     "zod": "^4.4.2"
+  },
+  "devDependencies": {
+    "@types/nunjucks": "^3.2.6"
   }
 }

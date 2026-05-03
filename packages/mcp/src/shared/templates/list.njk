@@ -1,0 +1,18 @@
+## {{ title }}
+
+{% if description %}{{ description }}
+
+{% endif -%}
+
+### Details
+
+{% for item in items -%}
+- **{{ item.name }}** ({{ item.status }})
+  - ID: {{ item.id }}
+  - Priority: {{ item.priority or "N/A" }}
+{% endfor %}
+
+{% if pagination %}
+---
+*Showing {{ pagination.count }} of {{ pagination.total }} (Page {{ pagination.page or 1 }})*
+{% endif %}
