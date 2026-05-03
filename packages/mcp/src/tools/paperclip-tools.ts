@@ -11,6 +11,7 @@ import {
   readOnlyListSchema,
 } from "../schemas.js";
 import type { PaperclipClient } from "../services/paperclip-client.js";
+import type { ServiceContainer } from "../shared/container.js";
 import type { PaginatedResult, PaperclipAgent, PaperclipIssue } from "../types.js";
 import {
   buildCompanyActivityFeed,
@@ -67,21 +68,32 @@ import {
   selectText,
 } from "./paperclip-tool-helpers.js";
 
-async function resolveCompany(
-  client: PaperclipClient,
-  companyId?: string,
-): Promise<Awaited<ReturnType<PaperclipClient["listCompanies"]>>[number]> {
-  const companies = await client.listCompanies();
+async function resolveCompany(container: ServiceContainer, companyId?: string): Promise<any> {
+  if (companyId) {
+    const result = await container.getCompanyApplicationService().getCompany({ id: companyId });
+    if (!result.ok) throw new Error(result.error.message);
+    return result.value;
+  }
 
-  return resolveRequestedItem(companies, {
-    itemId: companyId,
+  const listResult = await container
+    .getCompanyApplicationService()
+    .listCompanies({ limit: 100, offset: 0 });
+  if (!listResult.ok) throw new Error(listResult.error.message);
+
+  const items = listResult.value.items;
+  return resolveRequestedItem(items, {
+    itemId: undefined,
     resourceName: "company",
     resourceNamePlural: "companies",
-    idFieldName: "company_id",
+    idFieldName: "id",
   });
 }
 
-export function registerPaperclipTools(server: McpServer, client: PaperclipClient): void {
+export function registerPaperclipTools(
+  server: McpServer,
+  client: PaperclipClient,
+  container: ServiceContainer,
+): void {
   server.registerTool(
     "paperclip_get_health",
     {
@@ -167,8 +179,11 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ response_format = "markdown" }) => {
       try {
-        const companies = await client.listCompanies();
-        const summary = buildCompanyExecutionSummary(companies);
+        const result = await container
+          .getCompanyApplicationService()
+          .listCompanies({ limit: 1000, offset: 0 });
+        if (!result.ok) throw new Error(result.error.message);
+        const summary = buildCompanyExecutionSummary(result.value.items as any);
         return createTextResult(
           selectText(response_format, summary, renderCompanyExecutionSummary),
           summary,
@@ -195,7 +210,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id: companyId, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, companyId);
+        const company = await resolveCompany(container, companyId);
         return createTextResult(selectText(response_format, company, renderCompany), company);
       } catch (error) {
         return createErrorResult(error);
@@ -219,7 +234,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id: companyId, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, companyId);
+        const company = await resolveCompany(container, companyId);
         const activityFeed = buildCompanyActivityFeed(company);
         return createTextResult(
           selectText(response_format, activityFeed, renderCompanyActivityFeed),
@@ -247,7 +262,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id: companyId, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, companyId);
+        const company = await resolveCompany(container, companyId);
         const summary = buildCompanyBoardSummary(company);
         return createTextResult(
           selectText(response_format, summary, renderCompanyBoardSummary),
@@ -275,7 +290,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id: companyId, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, companyId);
+        const company = await resolveCompany(container, companyId);
         const metrics = buildCompanyMetrics(company);
         return createTextResult(
           selectText(response_format, metrics, renderCompanyMetrics),
@@ -303,7 +318,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id: companyId, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, companyId);
+        const company = await resolveCompany(container, companyId);
         const policies = buildCompanyPolicies(company);
         return createTextResult(
           selectText(response_format, policies, renderCompanyPolicies),
@@ -331,9 +346,19 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const companies = await client.listCompanies();
-        const page = paginate(companies, limit, offset);
-        const structured = { ...page, companies: page.items };
+        const result = await container
+          .getCompanyApplicationService()
+          .listCompanies({ limit, offset });
+        if (!result.ok) throw new Error(result.error.message);
+        const dto = result.value;
+        const structured = {
+          total: dto.total,
+          count: dto.count,
+          offset: dto.offset,
+          has_more: dto.hasMore,
+          ...(dto.nextOffset !== undefined ? { next_offset: dto.nextOffset } : {}),
+          items: dto.items as any,
+        };
         return createTextResult(
           selectText(response_format, structured, renderCompanies),
           structured,
@@ -413,7 +438,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const agents = await client.getCompanyAgents(company.id);
         const page = paginate(agents, limit, offset);
         const structured = { ...page, agents: page.items };
@@ -438,7 +463,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, agent_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const agent = await client.getCompanyAgent(company.id, agent_id);
         return createTextResult(selectText(response_format, agent, renderAgent), agent);
       } catch (error) {
@@ -461,7 +486,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const projects = await client.getCompanyProjects(company.id);
         const page = paginate(projects, limit, offset);
         const structured = { ...page, projects: page.items };
@@ -489,7 +514,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, project_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const project = await client.getCompanyProject(company.id, project_id);
         return createTextResult(selectText(response_format, project, renderProject), project);
       } catch (error) {
@@ -512,7 +537,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const issues = await client.getCompanyIssues(company.id);
         const page = paginate(issues, limit, offset);
         const structured = { ...page, issues: page.items };
@@ -537,7 +562,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, issue_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const issue = await client.getCompanyIssue(company.id, issue_id);
         return createTextResult(selectText(response_format, issue, renderIssue), issue);
       } catch (error) {
@@ -561,7 +586,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, agent_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const agent = await client.getAgentStatus(company.id, agent_id);
         return createTextResult(selectText(response_format, agent, renderAgentStatus), agent);
       } catch (error) {
@@ -584,7 +609,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, agent_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const data = await client.getAgentWorkload(company.id, agent_id);
         return createTextResult(selectText(response_format, data, renderAgentWorkload), data);
       } catch (error) {
@@ -607,7 +632,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, agent_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const data = await client.getAgentRecentActivity(company.id, agent_id);
         return createTextResult(selectText(response_format, data, renderAgentRecentActivity), data);
       } catch (error) {
@@ -630,7 +655,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, agent_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const agent = await client.getAgentCapabilities(company.id, agent_id);
         return createTextResult(selectText(response_format, agent, renderAgentCapabilities), agent);
       } catch (error) {
@@ -654,7 +679,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, project_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const data = await client.getProjectStatus(company.id, project_id);
         return createTextResult(selectText(response_format, data, renderProjectStatus), data);
       } catch (error) {
@@ -677,7 +702,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, project_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const issues = await client.getProjectRisks(company.id, project_id);
         const page: PaginatedResult<PaperclipIssue> = {
           items: issues,
@@ -707,7 +732,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, project_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const agents = await client.listProjectAgents(company.id, project_id);
         const page: PaginatedResult<PaperclipAgent> = {
           items: agents,
@@ -740,7 +765,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, project_id, limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const issues = await client.listProjectTasks(company.id, project_id);
         const page = paginate(issues, limit, offset);
         return createTextResult(selectText(response_format, page, renderProjectTasks), page);
@@ -765,7 +790,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const issues = await client.listBlockedTasks(company.id);
         const page = paginate(issues, limit, offset);
         return createTextResult(selectText(response_format, page, renderBlockedTasks), page);
@@ -789,7 +814,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const issues = await client.listOverdueTasks(company.id);
         const page = paginate(issues, limit, offset);
         return createTextResult(selectText(response_format, page, renderOverdueTasks), page);
@@ -813,7 +838,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const issues = await client.listUnassignedTasks(company.id);
         const page = paginate(issues, limit, offset);
         return createTextResult(selectText(response_format, page, renderUnassignedTasks), page);
@@ -837,7 +862,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, issue_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const data = await client.getTaskDependencies(company.id, issue_id);
         return createTextResult(selectText(response_format, data, renderTaskDependencies), data);
       } catch (error) {
@@ -861,7 +886,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const issues = await client.listPendingApprovals(company.id);
         const page = paginate(issues, limit, offset);
         return createTextResult(selectText(response_format, page, renderPendingApprovals), page);
@@ -885,7 +910,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, issue_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const issue = await client.getApprovalRequest(company.id, issue_id);
         return createTextResult(selectText(response_format, issue, renderApprovalRequest), issue);
       } catch (error) {
@@ -908,7 +933,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const issues = await client.listHighRiskActions(company.id);
         const page = paginate(issues, limit, offset);
         return createTextResult(selectText(response_format, page, renderHighRiskActions), page);
@@ -933,7 +958,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const routines = await client.listRoutines(company.id);
         return createTextResult(selectText(response_format, routines, renderRoutines), {
           routines,
@@ -959,7 +984,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, routine_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const routine = await client.getRoutine(company.id, routine_id);
         return createTextResult(selectText(response_format, routine, renderRoutine), routine);
       } catch (error) {
@@ -982,7 +1007,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, routine_id, limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const runs = await client.listRoutineRuns(company.id, routine_id);
         const page = paginate(runs, limit, offset);
         return createTextResult(selectText(response_format, page.items, renderRoutineRuns), page);
@@ -1006,7 +1031,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, run_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const run = await client.getRoutineRun(company.id, run_id);
         return createTextResult(selectText(response_format, run, renderRoutineRun), run);
       } catch (error) {
@@ -1029,7 +1054,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const issues = await client.listFailedRoutineRuns(company.id);
         const page = paginate(issues, limit, offset);
         return createTextResult(selectText(response_format, page, renderFailedRoutineRuns), page);
@@ -1053,7 +1078,7 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
     },
     async ({ company_id, routine_id, response_format = "markdown" }) => {
       try {
-        const company = await resolveCompany(client, company_id);
+        const company = await resolveCompany(container, company_id);
         const schedule = await client.getRoutineSchedule(company.id, routine_id);
         return createTextResult(
           selectText(response_format, schedule, renderRoutineSchedule),
