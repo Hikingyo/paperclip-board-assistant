@@ -57,7 +57,16 @@ export class PaperclipClient {
   }
 
   async getCompanyAgent(companyId: string, agentId: string): Promise<PaperclipAgent> {
-    return this.getJson(`/api/companies/${companyId}/agents/${agentId}`);
+    const agents = await this.getCompanyAgents(companyId);
+    const agent = agents.find((a) => a.id === agentId);
+    if (!agent) {
+      throw new PaperclipApiError(
+        `Agent ${agentId} not found in company ${companyId}.`,
+        `/api/companies/${companyId}/agents/${agentId}`,
+        404,
+      );
+    }
+    return agent;
   }
 
   private async getJson<T>(path: string): Promise<T> {
