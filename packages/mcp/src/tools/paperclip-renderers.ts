@@ -487,3 +487,234 @@ export function renderIssue(issue: PaperclipIssue): string {
 
   return lines.join("\n");
 }
+
+// ===== Agents Advanced =====
+export function renderAgentStatus(agent: PaperclipAgent): string {
+  const lines: string[] = [];
+  lines.push(`## Agent: ${agent.name}`);
+  lines.push(`**Status**: ${agent.status}`);
+  lines.push(`**Role**: ${agent.role}`);
+  lines.push(`**Last Heartbeat**: ${agent.lastHeartbeatAt ?? "Never"}`);
+  lines.push(`**Budget**: $${(agent.budgetMonthlyCents / 100).toFixed(2)}`);
+  lines.push(`**Spent**: $${(agent.spentMonthlyCents / 100).toFixed(2)}`);
+  return lines.join("\n");
+}
+
+export function renderAgentWorkload(data: PaperclipAgent & { assignedIssueCount: number }): string {
+  const lines: string[] = [];
+  lines.push(`## Agent Workload: ${data.name}`);
+  lines.push(`**Assigned Active Issues**: ${data.assignedIssueCount}`);
+  lines.push(`**Status**: ${data.status}`);
+  lines.push(`**Role**: ${data.role}`);
+  return lines.join("\n");
+}
+
+export function renderAgentRecentActivity(data: {
+  agent: PaperclipAgent;
+  recentIssues: PaperclipIssue[];
+}): string {
+  const lines: string[] = [];
+  lines.push(`## Recent Activity: ${data.agent.name}`);
+  lines.push(`**Created Issues**: ${data.recentIssues.length}`);
+  for (const issue of data.recentIssues.slice(0, 5)) {
+    lines.push(`- ${issue.title} (${issue.status})`);
+  }
+  return lines.join("\n");
+}
+
+export function renderAgentCapabilities(agent: PaperclipAgent): string {
+  const lines: string[] = [];
+  lines.push(`## Agent Capabilities: ${agent.name}`);
+  lines.push(`**Role**: ${agent.role}`);
+  lines.push(`**Title**: ${agent.title}`);
+  if (agent.capabilities) {
+    lines.push(`**Capabilities**: ${agent.capabilities}`);
+  }
+  return lines.join("\n");
+}
+
+// ===== Projects Advanced =====
+export function renderProjectStatus(
+  data: PaperclipProject & {
+    totalIssues: number;
+    openIssues: number;
+    blockedIssues: number;
+    doneIssues: number;
+  },
+): string {
+  const lines: string[] = [];
+  lines.push(`## Project Status: ${data.name}`);
+  lines.push(`**Total Issues**: ${data.totalIssues}`);
+  lines.push(`**Open**: ${data.openIssues}`);
+  lines.push(`**Blocked**: ${data.blockedIssues}`);
+  lines.push(`**Done**: ${data.doneIssues}`);
+  return lines.join("\n");
+}
+
+export function renderProjectRisks(issues: PaperclipIssue[]): string {
+  const lines: string[] = [];
+  lines.push(`## High-Risk Blocked Issues`);
+  if (!issues.length) {
+    lines.push("No high-risk blocked issues.");
+    return lines.join("\n");
+  }
+  for (const issue of issues) {
+    lines.push(`- **${issue.title}** (${issue.priority})`);
+  }
+  return lines.join("\n");
+}
+
+export function renderProjectAgents(agents: PaperclipAgent[]): string {
+  const lines: string[] = [];
+  lines.push(`## Project Agents (${agents.length})`);
+  for (const agent of agents) {
+    lines.push(`- ${agent.name} (${agent.role})`);
+  }
+  return lines.join("\n");
+}
+
+export function renderProjectTasks(page: PaginatedResult<PaperclipIssue>): string {
+  const lines: string[] = [];
+  lines.push(`## Project Tasks (${page.total})`);
+  for (const issue of page.items) {
+    lines.push(`- **${issue.title}** (${issue.status}) - ${issue.id}`);
+  }
+  if (page.hasMore) {
+    lines.push(`\n*Showing ${page.items.length} of ${page.total} (offset: ${page.nextOffset})*`);
+  }
+  return lines.join("\n");
+}
+
+// ===== Tasks Filters =====
+export function renderBlockedTasks(page: PaginatedResult<PaperclipIssue>): string {
+  const lines: string[] = [];
+  lines.push(`## Blocked Tasks (${page.total})`);
+  for (const issue of page.items) {
+    lines.push(`- **${issue.title}** - ${issue.id}`);
+  }
+  return lines.join("\n");
+}
+
+export function renderOverdueTasks(page: PaginatedResult<PaperclipIssue>): string {
+  const lines: string[] = [];
+  lines.push(`## Overdue Tasks (${page.total})`);
+  for (const issue of page.items) {
+    lines.push(`- **${issue.title}** - ${issue.id}`);
+  }
+  return lines.join("\n");
+}
+
+export function renderUnassignedTasks(page: PaginatedResult<PaperclipIssue>): string {
+  const lines: string[] = [];
+  lines.push(`## Unassigned Tasks (${page.total})`);
+  for (const issue of page.items) {
+    lines.push(`- **${issue.title}** (${issue.priority}) - ${issue.id}`);
+  }
+  return lines.join("\n");
+}
+
+export function renderTaskDependencies(data: {
+  task: PaperclipIssue;
+  parentTask?: PaperclipIssue;
+  blockerTasks: PaperclipIssue[];
+  dependentTasks: PaperclipIssue[];
+}): string {
+  const lines: string[] = [];
+  lines.push(`## Task Dependencies: ${data.task.title}`);
+  if (data.parentTask) {
+    lines.push(`**Parent**: ${data.parentTask.title}`);
+  }
+  if (data.blockerTasks.length) {
+    lines.push(`**Blocked by**: ${data.blockerTasks.map((t) => t.title).join(", ")}`);
+  }
+  if (data.dependentTasks.length) {
+    lines.push(`**Blocks**: ${data.dependentTasks.map((t) => t.title).join(", ")}`);
+  }
+  return lines.join("\n");
+}
+
+// ===== Approvals =====
+export function renderPendingApprovals(page: PaginatedResult<PaperclipIssue>): string {
+  const lines: string[] = [];
+  lines.push(`## Pending Approvals (${page.total})`);
+  for (const issue of page.items) {
+    lines.push(`- **${issue.title}** - Awaiting decision`);
+  }
+  return lines.join("\n");
+}
+
+export function renderApprovalRequest(issue: PaperclipIssue): string {
+  const lines: string[] = [];
+  lines.push(`## Approval Request: ${issue.title}`);
+  lines.push(`**Status**: ${issue.status}`);
+  lines.push(`**Description**: ${issue.description ?? "None"}`);
+  lines.push(`**Created**: ${issue.createdAt}`);
+  return lines.join("\n");
+}
+
+export function renderHighRiskActions(page: PaginatedResult<PaperclipIssue>): string {
+  const lines: string[] = [];
+  lines.push(`## High-Risk Actions (${page.total})`);
+  for (const issue of page.items) {
+    lines.push(`- **${issue.title}** (${issue.priority}) - ${issue.status}`);
+  }
+  return lines.join("\n");
+}
+
+// ===== Routines =====
+export function renderRoutines(routines: Array<{ id: string; name: string }>): string {
+  const lines: string[] = [];
+  lines.push(`## Routines (${routines.length})`);
+  for (const routine of routines) {
+    lines.push(`- ${routine.name}`);
+  }
+  return lines.join("\n");
+}
+
+export function renderRoutine(routine: { id: string; name: string }): string {
+  return `## Routine: ${routine.name}\n**ID**: ${routine.id}`;
+}
+
+export function renderRoutineRuns(
+  runs: Array<{ id: string; status: string; createdAt: string }>,
+): string {
+  const lines: string[] = [];
+  lines.push(`## Routine Runs (${runs.length})`);
+  for (const run of runs) {
+    lines.push(`- ${run.createdAt}: ${run.status}`);
+  }
+  return lines.join("\n");
+}
+
+export function renderRoutineRun(run: {
+  id: string;
+  status: string;
+  createdAt: string;
+  completedAt?: string;
+}): string {
+  const lines: string[] = [];
+  lines.push(`## Routine Run`);
+  lines.push(`**Status**: ${run.status}`);
+  lines.push(`**Created**: ${run.createdAt}`);
+  if (run.completedAt) {
+    lines.push(`**Completed**: ${run.completedAt}`);
+  }
+  return lines.join("\n");
+}
+
+export function renderFailedRoutineRuns(page: PaginatedResult<PaperclipIssue>): string {
+  const lines: string[] = [];
+  lines.push(`## Failed Routine Runs (${page.total})`);
+  for (const issue of page.items) {
+    lines.push(`- **${issue.title}** - ${issue.status}`);
+  }
+  return lines.join("\n");
+}
+
+export function renderRoutineSchedule(data: { nextRunAt: string; frequency: string }): string {
+  const lines: string[] = [];
+  lines.push(`## Routine Schedule`);
+  lines.push(`**Frequency**: ${data.frequency}`);
+  lines.push(`**Next Run**: ${data.nextRunAt}`);
+  return lines.join("\n");
+}

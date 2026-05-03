@@ -1,4 +1,5 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
 
 import {
   agentReadOnlyGetSchema,
@@ -10,6 +11,7 @@ import {
   readOnlyListSchema,
 } from "../schemas.js";
 import type { PaperclipClient } from "../services/paperclip-client.js";
+import type { PaginatedResult, PaperclipAgent, PaperclipIssue } from "../types.js";
 import {
   buildCompanyActivityFeed,
   buildCompanyBoardSummary,
@@ -20,7 +22,13 @@ import {
 import {
   renderAdapters,
   renderAgent,
+  renderAgentCapabilities,
+  renderAgentRecentActivity,
+  renderAgentStatus,
   renderAgents,
+  renderAgentWorkload,
+  renderApprovalRequest,
+  renderBlockedTasks,
   renderCompanies,
   renderCompany,
   renderCompanyActivityFeed,
@@ -28,14 +36,28 @@ import {
   renderCompanyExecutionSummary,
   renderCompanyMetrics,
   renderCompanyPolicies,
+  renderFailedRoutineRuns,
   renderHealth,
+  renderHighRiskActions,
   renderIssue,
   renderIssues,
+  renderOverdueTasks,
+  renderPendingApprovals,
   renderPlugins,
   renderProfile,
   renderProject,
+  renderProjectRisks,
+  renderProjectStatus,
   renderProjects,
+  renderProjectTasks,
+  renderRoutine,
+  renderRoutineRun,
+  renderRoutineRuns,
+  renderRoutineSchedule,
+  renderRoutines,
   renderSession,
+  renderTaskDependencies,
+  renderUnassignedTasks,
 } from "./paperclip-renderers.js";
 import {
   createErrorResult,
@@ -518,6 +540,525 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
         const company = await resolveCompany(client, company_id);
         const issue = await client.getCompanyIssue(company.id, issue_id);
         return createTextResult(selectText(response_format, issue, renderIssue), issue);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  // ===== Agents Advanced =====
+  server.registerTool(
+    "paperclip_get_agent_status",
+    {
+      description: "Get status and health metrics for a specific agent.",
+      inputSchema: agentReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, agent_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const agent = await client.getAgentStatus(company.id, agent_id);
+        return createTextResult(selectText(response_format, agent, renderAgentStatus), agent);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_agent_workload",
+    {
+      description: "Get workload information for a specific agent.",
+      inputSchema: agentReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, agent_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const data = await client.getAgentWorkload(company.id, agent_id);
+        return createTextResult(selectText(response_format, data, renderAgentWorkload), data);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_agent_recent_activity",
+    {
+      description: "Get recent activity and work history for a specific agent.",
+      inputSchema: agentReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, agent_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const data = await client.getAgentRecentActivity(company.id, agent_id);
+        return createTextResult(selectText(response_format, data, renderAgentRecentActivity), data);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_agent_capabilities",
+    {
+      description: "Get capabilities and skills for a specific agent.",
+      inputSchema: agentReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, agent_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const agent = await client.getAgentCapabilities(company.id, agent_id);
+        return createTextResult(selectText(response_format, agent, renderAgentCapabilities), agent);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  // ===== Projects Advanced =====
+  server.registerTool(
+    "paperclip_get_project_status",
+    {
+      description: "Get project status including issue counts and metrics.",
+      inputSchema: projectReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, project_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const data = await client.getProjectStatus(company.id, project_id);
+        return createTextResult(selectText(response_format, data, renderProjectStatus), data);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_project_risks",
+    {
+      description: "Get high-risk blocked issues in a project.",
+      inputSchema: projectReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, project_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const issues = await client.getProjectRisks(company.id, project_id);
+        const page: PaginatedResult<PaperclipIssue> = {
+          items: issues,
+          total: issues.length,
+          count: issues.length,
+          offset: 0,
+          has_more: false,
+        };
+        return createTextResult(selectText(response_format, issues, renderProjectRisks), page);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_list_project_agents",
+    {
+      description: "List agents working on a project.",
+      inputSchema: projectReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, project_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const agents = await client.listProjectAgents(company.id, project_id);
+        const page: PaginatedResult<PaperclipAgent> = {
+          items: agents,
+          total: agents.length,
+          count: agents.length,
+          offset: 0,
+          has_more: false,
+        };
+        return createTextResult(selectText(response_format, page, renderAgents), page);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_list_project_tasks",
+    {
+      description: "List tasks/issues in a project.",
+      inputSchema: projectReadOnlyGetSchema.extend({
+        limit: z.number().default(20),
+        offset: z.number().default(0),
+      }),
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, project_id, limit = 20, offset = 0, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const issues = await client.listProjectTasks(company.id, project_id);
+        const page = paginate(issues, limit, offset);
+        return createTextResult(selectText(response_format, page, renderProjectTasks), page);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  // ===== Tasks Filters =====
+  server.registerTool(
+    "paperclip_list_blocked_tasks",
+    {
+      description: "List all blocked tasks in a company.",
+      inputSchema: companyReadOnlyListSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const issues = await client.listBlockedTasks(company.id);
+        const page = paginate(issues, limit, offset);
+        return createTextResult(selectText(response_format, page, renderBlockedTasks), page);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_list_overdue_tasks",
+    {
+      description: "List all overdue tasks in a company.",
+      inputSchema: companyReadOnlyListSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const issues = await client.listOverdueTasks(company.id);
+        const page = paginate(issues, limit, offset);
+        return createTextResult(selectText(response_format, page, renderOverdueTasks), page);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_list_unassigned_tasks",
+    {
+      description: "List all unassigned tasks in a company.",
+      inputSchema: companyReadOnlyListSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const issues = await client.listUnassignedTasks(company.id);
+        const page = paginate(issues, limit, offset);
+        return createTextResult(selectText(response_format, page, renderUnassignedTasks), page);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_task_dependencies",
+    {
+      description: "Get task dependencies including parent, blockers, and dependents.",
+      inputSchema: issueReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, issue_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const data = await client.getTaskDependencies(company.id, issue_id);
+        return createTextResult(selectText(response_format, data, renderTaskDependencies), data);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  // ===== Approvals =====
+  server.registerTool(
+    "paperclip_list_pending_approvals",
+    {
+      description: "List pending approvals and decisions.",
+      inputSchema: companyReadOnlyListSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const issues = await client.listPendingApprovals(company.id);
+        const page = paginate(issues, limit, offset);
+        return createTextResult(selectText(response_format, page, renderPendingApprovals), page);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_approval_request",
+    {
+      description: "Get details about a specific approval request.",
+      inputSchema: issueReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, issue_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const issue = await client.getApprovalRequest(company.id, issue_id);
+        return createTextResult(selectText(response_format, issue, renderApprovalRequest), issue);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_list_high_risk_actions",
+    {
+      description: "List high-risk actions awaiting approval.",
+      inputSchema: companyReadOnlyListSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const issues = await client.listHighRiskActions(company.id);
+        const page = paginate(issues, limit, offset);
+        return createTextResult(selectText(response_format, page, renderHighRiskActions), page);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  // ===== Routines =====
+  server.registerTool(
+    "paperclip_list_routines",
+    {
+      description: "List active routines in the company.",
+      inputSchema: companyReadOnlyListSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const routines = await client.listRoutines(company.id);
+        return createTextResult(selectText(response_format, routines, renderRoutines), {
+          routines,
+          total: routines.length,
+        });
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_routine",
+    {
+      description: "Get details about a specific routine.",
+      inputSchema: companyReadOnlyGetSchema.extend({ routine_id: z.string() }),
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, routine_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const routine = await client.getRoutine(company.id, routine_id);
+        return createTextResult(selectText(response_format, routine, renderRoutine), routine);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_list_routine_runs",
+    {
+      description: "List runs of a specific routine.",
+      inputSchema: companyReadOnlyListSchema.extend({ routine_id: z.string() }),
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, routine_id, limit = 20, offset = 0, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const runs = await client.listRoutineRuns(company.id, routine_id);
+        const page = paginate(runs, limit, offset);
+        return createTextResult(selectText(response_format, page.items, renderRoutineRuns), page);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_routine_run",
+    {
+      description: "Get details about a specific routine run.",
+      inputSchema: companyReadOnlyGetSchema.extend({ run_id: z.string() }),
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, run_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const run = await client.getRoutineRun(company.id, run_id);
+        return createTextResult(selectText(response_format, run, renderRoutineRun), run);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_list_failed_routine_runs",
+    {
+      description: "List failed routine runs.",
+      inputSchema: companyReadOnlyListSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const issues = await client.listFailedRoutineRuns(company.id);
+        const page = paginate(issues, limit, offset);
+        return createTextResult(selectText(response_format, page, renderFailedRoutineRuns), page);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_routine_schedule",
+    {
+      description: "Get the schedule for a routine.",
+      inputSchema: companyReadOnlyGetSchema.extend({ routine_id: z.string() }),
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, routine_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const schedule = await client.getRoutineSchedule(company.id, routine_id);
+        return createTextResult(
+          selectText(response_format, schedule, renderRoutineSchedule),
+          schedule,
+        );
       } catch (error) {
         return createErrorResult(error);
       }
