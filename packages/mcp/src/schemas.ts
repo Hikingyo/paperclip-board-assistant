@@ -37,6 +37,22 @@ export const companyReadOnlyGetSchema = readOnlyGetSchema.extend({
     ),
 });
 
+export const companyReadOnlyListSchema = readOnlyListSchema.extend({
+  company_id: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      "Target company ID. If omitted and exactly one company is visible, that company is selected automatically.",
+    ),
+});
+
+export const agentReadOnlyGetSchema = companyReadOnlyGetSchema.extend({
+  agent_id: z.string().min(1).describe("Agent ID to retrieve."),
+});
+
 export type ReadOnlyListInput = z.infer<typeof readOnlyListSchema>;
 export type ReadOnlyGetInput = z.infer<typeof readOnlyGetSchema>;
 export type CompanyReadOnlyGetInput = z.infer<typeof companyReadOnlyGetSchema>;
+export type CompanyReadOnlyListInput = z.infer<typeof companyReadOnlyListSchema>;
+export type AgentReadOnlyGetInput = z.infer<typeof agentReadOnlyGetSchema>;

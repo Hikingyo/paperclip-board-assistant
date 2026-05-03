@@ -158,6 +158,46 @@ export interface PaperclipPlugin extends Record<string, unknown> {
   [key: string]: unknown;
 }
 
+export interface PaperclipAgent extends Record<string, unknown> {
+  id: string;
+  companyId: string;
+  name: string;
+  role:
+    | "ceo"
+    | "cto"
+    | "cmo"
+    | "cfo"
+    | "security"
+    | "engineer"
+    | "designer"
+    | "pm"
+    | "qa"
+    | "devops"
+    | "researcher"
+    | "general";
+  title: string | null;
+  icon: string | null;
+  status: "active" | "idle" | "paused" | "pending_approval";
+  reportsTo: string | null;
+  capabilities: string | null;
+  adapterType: string;
+  adapterConfig: Record<string, unknown>;
+  runtimeConfig: Record<string, unknown>;
+  defaultEnvironmentId: string | null;
+  budgetMonthlyCents: number;
+  spentMonthlyCents: number;
+  pauseReason: string | null;
+  pausedAt: string | null;
+  permissions: {
+    canCreateAgents: boolean;
+  };
+  lastHeartbeatAt: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+  urlKey: string;
+}
+
 export interface PaginatedResult<T> extends Record<string, unknown> {
   total: number;
   count: number;

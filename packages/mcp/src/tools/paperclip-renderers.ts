@@ -1,6 +1,7 @@
 import type {
   PaginatedResult,
   PaperclipAdapter,
+  PaperclipAgent,
   PaperclipCompany,
   PaperclipCompanyActivityFeed,
   PaperclipCompanyBoardSummary,
@@ -310,4 +311,54 @@ export function renderCompanyExecutionSummary(summary: PaperclipCompanyExecution
     "## Company focus",
     ...(companyBlocks.length ? companyBlocks : ["No companies are visible."]),
   ].join("\n");
+}
+
+export function renderAgents(page: PaginatedResult<PaperclipAgent>): string {
+  const agentLines = page.items
+    .map(
+      (agent) =>
+        `- **${agent.name}** (${agent.role}) - ${agent.status}${agent.title ? ` - ${agent.title}` : ""}`,
+    )
+    .join("\n");
+
+  return [
+    "# Agents",
+    "",
+    `Showing ${page.count} of ${page.total} agents from offset ${page.offset}.`,
+    "",
+    agentLines.length ? agentLines : "No agents found.",
+  ].join("\n");
+}
+
+export function renderAgent(agent: PaperclipAgent): string {
+  const lines = [`# ${agent.name}`, `**Role**: ${agent.role} | **Status**: ${agent.status}`, ""];
+
+  if (agent.title) {
+    lines.push(`**Title**: ${agent.title}`);
+  }
+
+  if (agent.capabilities) {
+    lines.push(`**Capabilities**: ${agent.capabilities}`);
+  }
+
+  if (agent.reportsTo) {
+    lines.push(`**Reports to**: ${agent.reportsTo}`);
+  }
+
+  lines.push(
+    `**Budget**: $${(agent.budgetMonthlyCents / 100).toFixed(2)} (spent: $${(agent.spentMonthlyCents / 100).toFixed(2)})`,
+  );
+
+  if (agent.pauseReason) {
+    lines.push(`**Paused**: ${agent.pauseReason}`);
+  }
+
+  if (agent.lastHeartbeatAt) {
+    lines.push(`**Last heartbeat**: ${agent.lastHeartbeatAt}`);
+  }
+
+  lines.push(`**Created**: ${agent.createdAt}`);
+  lines.push(`**URL**: ${agent.urlKey}`);
+
+  return lines.join("\n");
 }

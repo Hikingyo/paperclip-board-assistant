@@ -1,6 +1,12 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
-import { companyReadOnlyGetSchema, readOnlyGetSchema, readOnlyListSchema } from "../schemas.js";
+import {
+  agentReadOnlyGetSchema,
+  companyReadOnlyGetSchema,
+  companyReadOnlyListSchema,
+  readOnlyGetSchema,
+  readOnlyListSchema,
+} from "../schemas.js";
 import type { PaperclipClient } from "../services/paperclip-client.js";
 import {
   buildCompanyActivityFeed,
@@ -11,6 +17,8 @@ import {
 } from "./paperclip-company-insights.js";
 import {
   renderAdapters,
+  renderAgent,
+  renderAgents,
   renderCompanies,
   renderCompany,
   renderCompanyActivityFeed,
@@ -357,6 +365,54 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
         const page = paginate(plugins, limit, offset);
         const structured = { ...page, plugins: page.items };
         return createTextResult(selectText(response_format, structured, renderPlugins), structured);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_list_agents",
+    {
+      description: "List all agents in a company.",
+      inputSchema: companyReadOnlyListSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const agents = await client.getCompanyAgents(company.id);
+        const page = paginate(agents, limit, offset);
+        const structured = { ...page, agents: page.items };
+        return createTextResult(selectText(response_format, structured, renderAgents), structured);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_agent",
+    {
+      description: "Get details about a specific agent in a company.",
+      inputSchema: agentReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, agent_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const agent = await client.getCompanyAgent(company.id, agent_id);
+        return createTextResult(selectText(response_format, agent, renderAgent), agent);
       } catch (error) {
         return createErrorResult(error);
       }

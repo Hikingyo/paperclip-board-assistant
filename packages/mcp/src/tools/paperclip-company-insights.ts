@@ -1,4 +1,5 @@
 import type {
+  PaperclipAgent,
   PaperclipCompany,
   PaperclipCompanyActivityEvent,
   PaperclipCompanyActivityFeed,
@@ -280,4 +281,40 @@ export function buildCompanyExecutionSummary(
   summary.portfolio_flags = getPortfolioFlags(summary);
 
   return summary;
+}
+
+export function renderAgentStatus(agent: PaperclipAgent): string {
+  const status = `${agent.status.charAt(0).toUpperCase() + agent.status.slice(1).replace(/_/g, " ")}`;
+  const icon = agent.icon ? ` ${agent.icon}` : "";
+  return `${status}${icon}`;
+}
+
+export function renderAgentDetails(agent: PaperclipAgent): string {
+  const lines = [
+    `## ${agent.name} (${agent.role})`,
+    `- **Status**: ${renderAgentStatus(agent)}`,
+    `- **URL**: ${agent.urlKey}`,
+  ];
+
+  if (agent.title) {
+    lines.push(`- **Title**: ${agent.title}`);
+  }
+
+  if (agent.capabilities) {
+    lines.push(`- **Capabilities**: ${agent.capabilities}`);
+  }
+
+  if (agent.reportsTo) {
+    lines.push(`- **Reports to**: ${agent.reportsTo}`);
+  }
+
+  lines.push(`- **Budget**: ${agent.budgetMonthlyCents}¢ (spent: ${agent.spentMonthlyCents}¢)`);
+
+  if (agent.lastHeartbeatAt) {
+    lines.push(`- **Last heartbeat**: ${agent.lastHeartbeatAt}`);
+  }
+
+  lines.push(`- **Created**: ${agent.createdAt}`);
+
+  return lines.join("\n");
 }

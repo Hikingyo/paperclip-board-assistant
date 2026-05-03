@@ -1,6 +1,7 @@
 import { DEFAULT_BASE_URL } from "../constants.js";
 import type {
   PaperclipAdapter,
+  PaperclipAgent,
   PaperclipCompany,
   PaperclipHealth,
   PaperclipPlugin,
@@ -49,6 +50,14 @@ export class PaperclipClient {
 
   async listPlugins(): Promise<PaperclipPlugin[]> {
     return this.getJson("/api/plugins");
+  }
+
+  async getCompanyAgents(companyId: string): Promise<PaperclipAgent[]> {
+    return this.getJson(`/api/companies/${companyId}/agents`);
+  }
+
+  async getCompanyAgent(companyId: string, agentId: string): Promise<PaperclipAgent> {
+    return this.getJson(`/api/companies/${companyId}/agents/${agentId}`);
   }
 
   private async getJson<T>(path: string): Promise<T> {
