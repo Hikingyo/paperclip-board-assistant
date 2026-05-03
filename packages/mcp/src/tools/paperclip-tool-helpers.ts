@@ -4,13 +4,12 @@ import { DEFAULT_BASE_URL } from "../constants.js";
 import { PaperclipApiError } from "../services/paperclip-client.js";
 import type { PaginatedResult, ResponseFormat } from "../types.js";
 
-export function createTextResult(
-  text: string,
-  structuredContent?: Record<string, unknown>,
-): CallToolResult {
+export function createTextResult(text: string, structuredContent?: unknown): CallToolResult {
   return {
     content: [{ type: "text", text }],
-    ...(structuredContent ? { structuredContent } : {}),
+    ...(structuredContent && typeof structuredContent === "object"
+      ? { structuredContent: structuredContent as Record<string, unknown> }
+      : {}),
   };
 }
 
