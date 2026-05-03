@@ -198,6 +198,68 @@ export interface PaperclipAgent extends Record<string, unknown> {
   urlKey: string;
 }
 
+export interface PaperclipWorkspace extends Record<string, unknown> {
+  id: string;
+  companyId: string;
+  projectId: string;
+  name: string;
+  sourceType: string;
+  cwd: string;
+  repoUrl: string | null;
+  repoRef: string | null;
+  defaultRef: string | null;
+  visibility: string;
+  setupCommand: string | null;
+  cleanupCommand: string | null;
+  remoteProvider: string | null;
+  remoteWorkspaceRef: string | null;
+  sharedWorkspaceKey: string | null;
+  metadata: Record<string, unknown> | null;
+  runtimeConfig: Record<string, unknown> | null;
+  isPrimary: boolean;
+  runtimeServices: unknown[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaperclipProject extends Record<string, unknown> {
+  id: string;
+  companyId: string;
+  goalId: string | null;
+  name: string;
+  description: string | null;
+  status: "in_progress" | "paused" | "completed" | "archived";
+  leadAgentId: string | null;
+  targetDate: string | null;
+  color: string;
+  env: string | null;
+  pauseReason: string | null;
+  pausedAt: string | null;
+  executionWorkspacePolicy: string | null;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  urlKey: string;
+  goalIds: string[];
+  goals: Array<{
+    id: string;
+    title: string;
+  }>;
+  codebase: {
+    workspaceId: string;
+    repoUrl: string;
+    repoRef: string | null;
+    defaultRef: string | null;
+    repoName: string;
+    localFolder: string;
+    managedFolder: string;
+    effectiveLocalFolder: string;
+    origin: string;
+  };
+  workspaces: PaperclipWorkspace[];
+  primaryWorkspace: PaperclipWorkspace;
+}
+
 export interface PaginatedResult<T> extends Record<string, unknown> {
   total: number;
   count: number;

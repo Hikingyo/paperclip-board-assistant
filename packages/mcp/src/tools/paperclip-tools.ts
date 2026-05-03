@@ -4,6 +4,7 @@ import {
   agentReadOnlyGetSchema,
   companyReadOnlyGetSchema,
   companyReadOnlyListSchema,
+  projectReadOnlyGetSchema,
   readOnlyGetSchema,
   readOnlyListSchema,
 } from "../schemas.js";
@@ -29,6 +30,8 @@ import {
   renderHealth,
   renderPlugins,
   renderProfile,
+  renderProject,
+  renderProjects,
   renderSession,
 } from "./paperclip-renderers.js";
 import {
@@ -413,6 +416,57 @@ export function registerPaperclipTools(server: McpServer, client: PaperclipClien
         const company = await resolveCompany(client, company_id);
         const agent = await client.getCompanyAgent(company.id, agent_id);
         return createTextResult(selectText(response_format, agent, renderAgent), agent);
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_list_projects",
+    {
+      description: "List projects in a company with pagination.",
+      inputSchema: companyReadOnlyListSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, limit = 20, offset = 0, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const projects = await client.getCompanyProjects(company.id);
+        const page = paginate(projects, limit, offset);
+        const structured = { ...page, projects: page.items };
+        return createTextResult(
+          selectText(response_format, structured, renderProjects),
+          structured,
+        );
+      } catch (error) {
+        return createErrorResult(error);
+      }
+    },
+  );
+
+  server.registerTool(
+    "paperclip_get_project",
+    {
+      description: "Get details about a specific project in a company.",
+      inputSchema: projectReadOnlyGetSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ company_id, project_id, response_format = "markdown" }) => {
+      try {
+        const company = await resolveCompany(client, company_id);
+        const project = await client.getCompanyProject(company.id, project_id);
+        return createTextResult(selectText(response_format, project, renderProject), project);
       } catch (error) {
         return createErrorResult(error);
       }

@@ -51,8 +51,13 @@ export const agentReadOnlyGetSchema = companyReadOnlyGetSchema.extend({
   agent_id: z.string().min(1).describe("Agent ID to retrieve."),
 });
 
+export const projectReadOnlyGetSchema = companyReadOnlyGetSchema.extend({
+  project_id: z.string().min(1).describe("Project ID to retrieve."),
+});
+
 export type ReadOnlyListInput = z.infer<typeof readOnlyListSchema>;
 export type ReadOnlyGetInput = z.infer<typeof readOnlyGetSchema>;
 export type CompanyReadOnlyGetInput = z.infer<typeof companyReadOnlyGetSchema>;
 export type CompanyReadOnlyListInput = z.infer<typeof companyReadOnlyListSchema>;
 export type AgentReadOnlyGetInput = z.infer<typeof agentReadOnlyGetSchema>;
+export type ProjectReadOnlyGetInput = z.infer<typeof projectReadOnlyGetSchema>;
