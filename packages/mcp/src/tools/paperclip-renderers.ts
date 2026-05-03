@@ -579,8 +579,8 @@ export function renderProjectTasks(page: PaginatedResult<PaperclipIssue>): strin
   for (const issue of page.items) {
     lines.push(`- **${issue.title}** (${issue.status}) - ${issue.id}`);
   }
-  if (page.hasMore) {
-    lines.push(`\n*Showing ${page.items.length} of ${page.total} (offset: ${page.nextOffset})*`);
+  if (page.has_more) {
+    lines.push(`\n*Showing ${page.items.length} of ${page.total} (offset: ${page.next_offset})*`);
   }
   return lines.join("\n");
 }

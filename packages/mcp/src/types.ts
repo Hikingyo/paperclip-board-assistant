@@ -1,6 +1,6 @@
 export type ResponseFormat = "markdown" | "json";
 
-export interface PaperclipHealth extends Record<string, unknown> {
+export interface PaperclipHealth {
   status: string;
   version: string;
   deploymentMode: string;
@@ -11,14 +11,14 @@ export interface PaperclipHealth extends Record<string, unknown> {
   features: Record<string, boolean>;
 }
 
-export interface PaperclipSessionUser extends Record<string, unknown> {
+export interface PaperclipSessionUser {
   id: string;
   email: string | null;
   name: string | null;
   image: string | null;
 }
 
-export interface PaperclipSession extends Record<string, unknown> {
+export interface PaperclipSession {
   session: {
     id: string;
     userId: string;
@@ -26,14 +26,14 @@ export interface PaperclipSession extends Record<string, unknown> {
   user: PaperclipSessionUser | null;
 }
 
-export interface PaperclipProfile extends Record<string, unknown> {
+export interface PaperclipProfile {
   id: string;
   email: string | null;
   name: string | null;
   image: string | null;
 }
 
-export interface PaperclipCompany extends Record<string, unknown> {
+export interface PaperclipCompany {
   id: string;
   name: string;
   description: string | null;
@@ -55,7 +55,7 @@ export interface PaperclipCompany extends Record<string, unknown> {
   logoUrl: string | null;
 }
 
-export interface PaperclipCompanyBoardSummary extends Record<string, unknown> {
+export interface PaperclipCompanyBoardSummary {
   company: PaperclipCompany;
   budget_remaining_cents: number | null;
   budget_utilization_percent: number | null;
@@ -65,7 +65,7 @@ export interface PaperclipCompanyBoardSummary extends Record<string, unknown> {
 
 export type PaperclipCompanyBudgetStatus = "not_configured" | "within_budget" | "over_budget";
 
-export interface PaperclipCompanyMetrics extends Record<string, unknown> {
+export interface PaperclipCompanyMetrics {
   company: PaperclipCompany;
   budget_status: PaperclipCompanyBudgetStatus;
   budget_remaining_cents: number | null;
@@ -75,7 +75,7 @@ export interface PaperclipCompanyMetrics extends Record<string, unknown> {
   attachment_max_mebibytes: number;
 }
 
-export interface PaperclipCompanyPolicies extends Record<string, unknown> {
+export interface PaperclipCompanyPolicies {
   company: PaperclipCompany;
   require_board_approval_for_new_agents: boolean;
   feedback_data_sharing_enabled: boolean;
@@ -90,7 +90,7 @@ export interface PaperclipCompanyPolicies extends Record<string, unknown> {
 
 export type PaperclipCompanyActivityEventKind = "lifecycle" | "governance" | "board_flag";
 
-export interface PaperclipCompanyActivityEvent extends Record<string, unknown> {
+export interface PaperclipCompanyActivityEvent {
   id: string;
   kind: PaperclipCompanyActivityEventKind;
   occurred_at: string;
@@ -98,7 +98,7 @@ export interface PaperclipCompanyActivityEvent extends Record<string, unknown> {
   summary: string;
 }
 
-export interface PaperclipCompanyActivityFeed extends Record<string, unknown> {
+export interface PaperclipCompanyActivityFeed {
   company: PaperclipCompany;
   derived_from: "visible_company_metadata";
   total_events: number;
@@ -106,7 +106,7 @@ export interface PaperclipCompanyActivityFeed extends Record<string, unknown> {
   activity: PaperclipCompanyActivityEvent[];
 }
 
-export interface PaperclipCompanyExecutionSummaryCompany extends Record<string, unknown> {
+export interface PaperclipCompanyExecutionSummaryCompany {
   company_id: string;
   company_name: string;
   status: string;
@@ -118,7 +118,7 @@ export interface PaperclipCompanyExecutionSummaryCompany extends Record<string, 
   last_updated_at: string;
 }
 
-export interface PaperclipCompanyExecutionSummary extends Record<string, unknown> {
+export interface PaperclipCompanyExecutionSummary {
   derived_from: "visible_companies_metadata";
   total_companies: number;
   active_companies: number;
@@ -133,7 +133,7 @@ export interface PaperclipCompanyExecutionSummary extends Record<string, unknown
   companies: PaperclipCompanyExecutionSummaryCompany[];
 }
 
-export interface PaperclipAdapter extends Record<string, unknown> {
+export interface PaperclipAdapter {
   type: string;
   label: string;
   source: string;
@@ -149,7 +149,7 @@ export interface PaperclipAdapter extends Record<string, unknown> {
   overridePaused: boolean;
 }
 
-export interface PaperclipPlugin extends Record<string, unknown> {
+export interface PaperclipPlugin {
   id?: string;
   slug?: string;
   name?: string;
@@ -158,7 +158,7 @@ export interface PaperclipPlugin extends Record<string, unknown> {
   [key: string]: unknown;
 }
 
-export interface PaperclipAgent extends Record<string, unknown> {
+export interface PaperclipAgent {
   id: string;
   companyId: string;
   name: string;
@@ -198,7 +198,7 @@ export interface PaperclipAgent extends Record<string, unknown> {
   urlKey: string;
 }
 
-export interface PaperclipWorkspace extends Record<string, unknown> {
+export interface PaperclipWorkspace {
   id: string;
   companyId: string;
   projectId: string;
@@ -222,7 +222,7 @@ export interface PaperclipWorkspace extends Record<string, unknown> {
   updatedAt: string;
 }
 
-export interface PaperclipProject extends Record<string, unknown> {
+export interface PaperclipProject {
   id: string;
   companyId: string;
   goalId: string | null;
@@ -260,7 +260,7 @@ export interface PaperclipProject extends Record<string, unknown> {
   primaryWorkspace: PaperclipWorkspace;
 }
 
-export interface PaperclipIssue extends Record<string, unknown> {
+export interface PaperclipIssue {
   id: string;
   companyId: string;
   projectId: string | null;
@@ -306,7 +306,7 @@ export interface PaperclipIssue extends Record<string, unknown> {
   };
 }
 
-export interface PaginatedResult<T> extends Record<string, unknown> {
+export interface PaginatedResult<T> {
   total: number;
   count: number;
   offset: number;
