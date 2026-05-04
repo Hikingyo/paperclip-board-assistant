@@ -1,0 +1,13 @@
+# {{ title }}
+
+- **ID**: {{ resource.id }}
+{% if resource.name %}- **Name**: {{ resource.name }}
+{% endif -%}
+{% if resource.title %}- **Title**: {{ resource.title }}
+{% endif -%}
+{% if resource.status %}- **Status**: {{ resource.status }}
+{% endif -%}
+{% if resource.priority %}- **Priority**: {{ resource.priority }}
+{% endif -%}
+{% if resource.description %}- **Description**: {{ resource.description }}
+{% endif %}

@@ -91,7 +91,7 @@ Examples:
 
 ## Architecture rules
 
-- Keep all Paperclip HTTP calls in `packages/mcp/src/services/paperclip-client.ts`.
+- Keep all direct Paperclip HTTP calls in `packages/mcp/src/shared/api/client.ts`.
 - Keep MCP tool registration and response shaping in `packages/mcp/src/tools/`.
 - Prefer reusable schemas and render helpers over duplicating inline logic in tool handlers.
 - Preserve `response_format`, markdown output, JSON output, and `structuredContent` for all user-facing tools.

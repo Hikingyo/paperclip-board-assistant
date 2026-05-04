@@ -1,4 +1,5 @@
 import type { TextContent } from "@modelcontextprotocol/sdk/types.js";
+import { renderJson } from "../presentation/json-presenter.js";
 import { renderTemplate } from "../shared/templates/index.js";
 
 export type ResponseFormat = "markdown" | "json";
@@ -29,7 +30,7 @@ export function formatResponse<T>(
   if (format === "json") {
     return {
       type: "text",
-      text: JSON.stringify(data, null, 2),
+      text: renderJson(data),
     };
   }
 

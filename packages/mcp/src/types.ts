@@ -306,6 +306,23 @@ export interface PaperclipIssue {
   };
 }
 
+export interface PaperclipRoutine {
+  id: string;
+  name: string;
+}
+
+export interface PaperclipRoutineRun {
+  id: string;
+  status: string;
+  createdAt: string;
+  completedAt?: string;
+}
+
+export interface PaperclipRoutineSchedule {
+  nextRunAt: string;
+  frequency: string;
+}
+
 export interface PaginatedResult<T> {
   total: number;
   count: number;

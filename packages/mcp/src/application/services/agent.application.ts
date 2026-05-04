@@ -1,4 +1,4 @@
-import type { AgentRepository } from "../../domains/agent/repository.js";
+import type { AgentService } from "../../domains/agent/service.js";
 import type { Result } from "../../shared/api/errors.js";
 import { logger } from "../../shared/logging/logger.js";
 import type {
@@ -15,7 +15,7 @@ import type {
  * Orchestrates use cases for agent domain
  */
 export class AgentApplicationService {
-  constructor(private agentRepository: AgentRepository) {}
+  constructor(private agentService: AgentService) {}
 
   /**
    * Get agent by ID (GetAgentQuery)
@@ -26,7 +26,7 @@ export class AgentApplicationService {
       agentId: query.agentId,
     });
 
-    const result = await this.agentRepository.findById(query.agentId);
+    const result = await this.agentService.getAgent(query.agentId);
     if (!result.ok) {
       return result as Result<AgentResponseDto>;
     }
@@ -59,7 +59,7 @@ export class AgentApplicationService {
   async listAgents(query: ListAgentsQuery): Promise<Result<PaginatedAgentsResponseDto>> {
     logger.debug("Application: Listing agents", { query });
 
-    const result = await this.agentRepository.findByCompanyId(query.companyId);
+    const result = await this.agentService.listAgentsByCompany(query.companyId);
     if (!result.ok) {
       return result as Result<PaginatedAgentsResponseDto>;
     }
@@ -106,7 +106,7 @@ export class AgentApplicationService {
       agentId: query.agentId,
     });
 
-    const result = await this.agentRepository.findById(query.agentId);
+    const result = await this.agentService.getAgent(query.agentId);
     if (!result.ok) {
       return result as Result<AgentHealthResponseDto>;
     }

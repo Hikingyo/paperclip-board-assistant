@@ -1,4 +1,4 @@
-import type { Result } from "../../shared/api/errors.js";
+import { API_ERROR_CODES, failure, type Result } from "../../shared/api/errors.js";
 import type { Company } from "./entity.js";
 import type { CompanyRepository } from "./repository.js";
 
@@ -14,10 +14,7 @@ export class CompanyService {
    */
   async getCompany(id: string): Promise<Result<Company>> {
     if (!id || id.trim().length === 0) {
-      return {
-        ok: false,
-        error: new Error("Invalid company ID") as any,
-      };
+      return failure("Invalid company ID", API_ERROR_CODES.VALIDATION, 400);
     }
     return this.companyRepository.findById(id);
   }

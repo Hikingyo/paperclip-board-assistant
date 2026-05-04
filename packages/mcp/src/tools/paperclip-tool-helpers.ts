@@ -1,7 +1,8 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 import { DEFAULT_BASE_URL } from "../constants.js";
-import { PaperclipApiError } from "../services/paperclip-client.js";
+import { renderJson } from "../presentation/json-presenter.js";
+import { PaperclipApiError } from "../shared/api/errors.js";
 import type { PaginatedResult, ResponseFormat } from "../types.js";
 
 export function createTextResult(text: string, structuredContent?: unknown): CallToolResult {
@@ -15,7 +16,10 @@ export function createTextResult(text: string, structuredContent?: unknown): Cal
 
 export function createErrorResult(error: unknown): CallToolResult {
   if (error instanceof PaperclipApiError) {
-    const detail = error.responseBody ? ` Response body: ${error.responseBody}` : "";
+    const detail =
+      error.details && Object.keys(error.details).length > 0
+        ? ` Details: ${JSON.stringify(error.details)}`
+        : "";
 
     return {
       isError: true,
@@ -37,7 +41,7 @@ export function createErrorResult(error: unknown): CallToolResult {
 }
 
 export function formatJson(value: unknown): string {
-  return JSON.stringify(value, null, 2);
+  return renderJson(value);
 }
 
 export function paginate<T>(items: T[], limit: number, offset: number): PaginatedResult<T> {
