@@ -36,7 +36,7 @@ This project is a **TypeScript MCP server** that speaks **stdio** and delegates 
 2. **Server assembly**
    - `packages/mcp/src/server.ts`
    - constructs `McpServer`
-   - wires the Paperclip client into tool registrars
+   - wires the `ServiceContainer` into tool registrars
 
 3. **Configuration**
    - `packages/mcp/src/config.ts`
@@ -44,8 +44,8 @@ This project is a **TypeScript MCP server** that speaks **stdio** and delegates 
    - normalizes the target Paperclip base URL
 
 4. **API boundary**
-   - `packages/mcp/src/services/paperclip-client.ts`
-   - the only module that performs direct HTTP requests to Paperclip
+   - `packages/mcp/src/shared/api/client.ts`
+   - centralized HTTP boundary used by repositories and transitional read-only tool gateway logic
 
 5. **Tool surface**
    - `packages/mcp/src/tools/paperclip-tools.ts`

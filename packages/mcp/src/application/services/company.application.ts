@@ -1,4 +1,4 @@
-import type { CompanyRepository } from "../../domains/company/repository.js";
+import type { CompanyService } from "../../domains/company/service.js";
 import type { Result } from "../../shared/api/errors.js";
 import { logger } from "../../shared/logging/logger.js";
 import type {
@@ -16,7 +16,7 @@ import type {
  * Handles DTO conversion and business logic orchestration
  */
 export class CompanyApplicationService {
-  constructor(private companyRepository: CompanyRepository) {}
+  constructor(private companyService: CompanyService) {}
 
   /**
    * Get company by ID (GetCompanyQuery)
@@ -24,7 +24,7 @@ export class CompanyApplicationService {
   async getCompany(query: GetCompanyQuery): Promise<Result<CompanyResponseDto>> {
     logger.debug("Application: Getting company", { id: query.id });
 
-    const result = await this.companyRepository.findById(query.id);
+    const result = await this.companyService.getCompany(query.id);
     if (!result.ok) {
       return result as Result<CompanyResponseDto>;
     }
@@ -59,7 +59,7 @@ export class CompanyApplicationService {
   async listCompanies(query: ListCompaniesQuery): Promise<Result<PaginatedCompaniesResponseDto>> {
     logger.debug("Application: Listing companies", { query });
 
-    const result = await this.companyRepository.findAll();
+    const result = await this.companyService.listCompanies();
     if (!result.ok) {
       return result as Result<PaginatedCompaniesResponseDto>;
     }
@@ -106,7 +106,7 @@ export class CompanyApplicationService {
   ): Promise<Result<CompanyHealthResponseDto>> {
     logger.debug("Application: Checking company health", { id: query.id });
 
-    const result = await this.companyRepository.findById(query.id);
+    const result = await this.companyService.getCompany(query.id);
     if (!result.ok) {
       return result as Result<CompanyHealthResponseDto>;
     }

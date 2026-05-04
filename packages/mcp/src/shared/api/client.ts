@@ -1,5 +1,5 @@
 import { logger } from "../logging/logger.js";
-import { API_ERROR_CODES, type ApiErrorCode, failure, type Result, success } from "./errors.js";
+import { API_ERROR_CODES, failure, type Result, statusToErrorCode, success } from "./errors.js";
 import { ApiPaths, type SearchParams } from "./paths.js";
 
 /**
@@ -17,7 +17,7 @@ interface FetchOptions {
  * Handles error responses, logging, and type safety
  */
 export class PaperclipApiClient {
-  constructor(private baseUrl: string) {
+  constructor(readonly baseUrl: string) {
     logger.debug("Initializing PaperclipApiClient", { baseUrl });
   }
 
@@ -104,7 +104,7 @@ export class PaperclipApiClient {
         });
         return failure(
           `API returned non-JSON response (${response.status})`,
-          this.statusToErrorCode(response.status),
+          statusToErrorCode(response.status),
           response.status,
           { responseBody: text },
         );
@@ -120,7 +120,7 @@ export class PaperclipApiClient {
         });
         return failure(
           `API request failed: ${response.status}`,
-          this.statusToErrorCode(response.status),
+          statusToErrorCode(response.status),
           response.status,
           { responseData: data },
         );
@@ -151,26 +151,6 @@ export class PaperclipApiClient {
       return failure(`Unexpected error during API request`, API_ERROR_CODES.UNKNOWN, undefined, {
         originalError: String(error),
       });
-    }
-  }
-
-  /**
-   * Convert HTTP status code to API error code
-   */
-  private statusToErrorCode(status: number): ApiErrorCode {
-    switch (true) {
-      case status === 401:
-        return API_ERROR_CODES.UNAUTHORIZED;
-      case status === 403:
-        return API_ERROR_CODES.FORBIDDEN;
-      case status === 404:
-        return API_ERROR_CODES.NOT_FOUND;
-      case status >= 400 && status < 500:
-        return API_ERROR_CODES.VALIDATION;
-      case status >= 500:
-        return API_ERROR_CODES.SERVER_ERROR;
-      default:
-        return API_ERROR_CODES.UNKNOWN;
     }
   }
 

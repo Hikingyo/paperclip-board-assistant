@@ -31,7 +31,7 @@ On top of that, the broader product should support:
   - `response_format` support
   - markdown + JSON + `structuredContent`
   - MCP-layer pagination (`limit`, `offset`, `has_more`, `next_offset`)
-- Keep Paperclip API access in `PaperclipClient`; keep MCP presentation and orchestration in tool modules.
+- Keep direct Paperclip API access in `PaperclipApiClient`; keep MCP presentation and orchestration in tool modules.
 - Distinguish between:
   - **Paperclip-side agents** that belong inside the company being operated
   - **Copilot-side assistants** that help a human design, supervise, and improve that company

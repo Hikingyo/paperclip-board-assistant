@@ -1,5 +1,5 @@
 import type { Company } from "../../domains/company/entity.js";
-import { CompanyMapper } from "../../domains/company/mapper.js";
+import { toCompanyDomain, toCompanyDomainList } from "../../domains/company/mapper.js";
 import type { CompanyRepository } from "../../domains/company/repository.js";
 import type { PaperclipApiClient } from "../../shared/api/client.js";
 import type { Result } from "../../shared/api/errors.js";
@@ -25,7 +25,7 @@ export class PaperclipCompanyRepository implements CompanyRepository {
 
     return {
       ok: true,
-      value: CompanyMapper.toDomain(result.value),
+      value: toCompanyDomain(result.value),
     };
   }
 
@@ -40,7 +40,7 @@ export class PaperclipCompanyRepository implements CompanyRepository {
 
     return {
       ok: true,
-      value: CompanyMapper.toDomainList(result.value),
+      value: toCompanyDomainList(result.value),
     };
   }
 
@@ -55,7 +55,7 @@ export class PaperclipCompanyRepository implements CompanyRepository {
 
     return {
       ok: true,
-      value: CompanyMapper.toDomain(result.value),
+      value: toCompanyDomain(result.value),
     };
   }
 }

@@ -1,0 +1,14 @@
+# {{ title }}
+
+Showing {{ count }} of {{ total }} items from offset {{ offset }}.
+
+{% for item in items -%}
+## {{ item.name or item.title or item.id }}
+- **ID**: {{ item.id }}
+{% if item.status %}- **Status**: {{ item.status }}
+{% endif -%}
+{% if item.priority %}- **Priority**: {{ item.priority }}
+{% endif -%}
+{% if item.description %}- **Description**: {{ item.description }}
+{% endif %}
+{% endfor -%}

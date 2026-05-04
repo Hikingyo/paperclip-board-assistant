@@ -131,7 +131,8 @@ npm run inspector
 - `packages/mcp/src/index.ts`: stdio bootstrap and process entrypoint
 - `packages/mcp/src/config.ts`: runtime config parsing and validation
 - `packages/mcp/src/server.ts`: MCP server assembly
-- `packages/mcp/src/services/paperclip-client.ts`: Paperclip HTTP client and API error boundary
+- `packages/mcp/src/shared/api/client.ts`: Paperclip HTTP client and API error boundary
+- `packages/mcp/src/shared/container.ts`: dependency injection container for application/domain services
 - `packages/mcp/src/tools/`: tool registration, insight builders, helpers, and markdown renderers
 - `packages/mcp/src/schemas.ts`: shared Zod schemas for the current read-only tools
 - `packages/mcp/src/types.ts`: response contracts for the current Paperclip resource surface

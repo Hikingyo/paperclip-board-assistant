@@ -9,7 +9,7 @@ import nunjucks from "nunjucks";
  */
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const templatesDir = path.join(__dirname, "./templates");
+const templatesDir = __dirname;
 
 // Configure Nunjucks
 const env = nunjucks.configure(templatesDir, {

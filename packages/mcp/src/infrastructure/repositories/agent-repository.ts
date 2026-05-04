@@ -1,5 +1,5 @@
 import type { Agent } from "../../domains/agent/entity.js";
-import { AgentMapper } from "../../domains/agent/mapper.js";
+import { toAgentDomain, toAgentDomainList } from "../../domains/agent/mapper.js";
 import type { AgentRepository } from "../../domains/agent/repository.js";
 import type { PaperclipApiClient } from "../../shared/api/client.js";
 import type { Result } from "../../shared/api/errors.js";
@@ -27,7 +27,7 @@ export class PaperclipAgentRepository implements AgentRepository {
 
     return {
       ok: true,
-      value: AgentMapper.toDomain(result.value),
+      value: toAgentDomain(result.value),
     };
   }
 
@@ -42,7 +42,7 @@ export class PaperclipAgentRepository implements AgentRepository {
 
     return {
       ok: true,
-      value: AgentMapper.toDomainList(result.value),
+      value: toAgentDomainList(result.value),
     };
   }
 
@@ -57,7 +57,7 @@ export class PaperclipAgentRepository implements AgentRepository {
 
     return {
       ok: true,
-      value: AgentMapper.toDomainList(result.value),
+      value: toAgentDomainList(result.value),
     };
   }
 }
